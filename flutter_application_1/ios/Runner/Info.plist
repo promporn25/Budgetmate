@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ใช้เลือกรูปโปรไฟล์จากคลังภาพของคุณ</string>
+	<key>NSCameraUsageDescription</key>
+	<string>ใช้กล้องเพื่อถ่ายรูปโปรไฟล์ของคุณ</string>
 </dict>
 </plist>

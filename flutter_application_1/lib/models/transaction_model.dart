@@ -42,4 +42,31 @@ class TransactionModel {
       receiptPath: receiptPath ?? this.receiptPath,
     );
   }
+
+  Map<String, dynamic> toMap(String userId) {
+    return {
+      'id': id,
+      'user_id': userId,
+      'type': type == CategoryType.income ? 'income' : 'expense',
+      'amount': amount,
+      'category_id': category.id,
+      'date': date.toIso8601String(),
+      'note': note,
+      'description': description,
+      'receipt_path': receiptPath,
+    };
+  }
+
+  factory TransactionModel.fromMap(Map<String, dynamic> map, CategoryModel category) {
+    return TransactionModel(
+      id: map['id'] as String,
+      type: map['type'] == 'income' ? CategoryType.income : CategoryType.expense,
+      amount: (map['amount'] as num).toDouble(),
+      category: category,
+      date: DateTime.parse(map['date'] as String),
+      note: map['note'] as String?,
+      description: map['description'] as String?,
+      receiptPath: map['receipt_path'] as String?,
+    );
+  }
 }

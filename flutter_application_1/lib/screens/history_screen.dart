@@ -1,3 +1,4 @@
+import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -25,11 +26,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final list = _showAll ? all : service.transactionsForDay(today);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('History')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black,
+        title: const Text('History', style: TextStyle(fontWeight: FontWeight.w600)),
+      ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 _filterChip('All', _showAll, () => setState(() => _showAll = true)),
@@ -40,11 +47,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           Expanded(
             child: list.isEmpty
-                ? const Center(child: Text('ยังไม่มีรายการ'))
+                ? const EmptyState(icon: Icons.receipt_long_outlined, text: 'ยังไม่มีรายการ')
                 : ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: list.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final t = list[index];
                       return _transactionTile(context, t, service);
@@ -60,14 +67,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _filterChip(String label, bool selected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
         decoration: BoxDecoration(
-          color: selected ? Colors.black : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(20),
+          color: selected ? Colors.black : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.pill),
         ),
         child: Text(label,
-            style: TextStyle(color: selected ? Colors.white : Colors.black)),
+            style: TextStyle(
+                color: selected ? Colors.white : Colors.black87,
+                fontWeight: FontWeight.w600,
+                fontSize: 13)),
       ),
     );
   }
@@ -78,26 +89,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Dismissible(
       key: ValueKey(t.id),
       background: Container(
-        color: Colors.red,
+        decoration: BoxDecoration(
+          color: AppColors.dangerBg,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: Icon(Icons.delete_outline_rounded, color: AppColors.danger),
       ),
-      onDismissed: (_) => service.deleteTransaction(t.id),
-      child: Card(
+      onDismissed: (_) async => service.deleteTransaction(t.id),
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: ListTile(
+          contentPadding: EdgeInsets.zero,
           leading: CircleAvatar(
-            backgroundColor: isIncome ? Colors.green.shade100 : Colors.red.shade100,
+            backgroundColor: isIncome ? AppColors.incomeBg : AppColors.expenseBg,
             child: Icon(t.category.icon,
-                color: isIncome ? Colors.green.shade800 : Colors.red.shade800),
+                color: isIncome ? AppColors.income : AppColors.expense),
           ),
-          title: Text(t.category.name),
+          title: Text(t.category.name, style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: Text(
-              '${DateFormat('d MMM yyyy').format(t.date)}${t.note != null ? ' • ${t.note}' : ''}'),
+              '${DateFormat('d MMM yyyy').format(t.date)}${t.note != null ? ' • ${t.note}' : ''}',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           trailing: Text(
             '${isIncome ? '+' : '-'}฿${t.amount.toStringAsFixed(2)}',
             style: TextStyle(
-              color: isIncome ? Colors.green.shade800 : Colors.red.shade800,
+              color: isIncome ? AppColors.income : AppColors.expense,
               fontWeight: FontWeight.bold,
             ),
           ),

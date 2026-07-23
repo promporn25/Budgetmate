@@ -1,10 +1,13 @@
+import 'package:budgetmate/screens/Forgot%20password%20screen.dart';
+import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/data_service.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
 
-/// หน้า Login (3.4.3) - เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน
+
+/// หน้า Login (3.4.3) - เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน (ตรวจสอบกับ SQLite จริง)
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -16,95 +19,124 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   String? _error;
+  bool _loading = false;
+  bool _obscure = true;
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
     final service = context.read<DataService>();
-    final error = service.login(_emailCtrl.text.trim(), _passCtrl.text);
+    final error = await service.login(_emailCtrl.text.trim(), _passCtrl.text);
+
+    if (!mounted) return;
+
     if (error == null) {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const HomeScreen()));
     } else {
-      setState(() => _error = error);
+      setState(() {
+        _loading = false;
+        _error = error;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 28),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const HeaderIconBadge(icon: Icons.account_balance_wallet_rounded),
+                const SizedBox(height: 20),
                 const Text('BUDGETMATE',
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 32),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                const SizedBox(height: 6),
+                Text('เข้าสู่ระบบเพื่อจัดการเงินของคุณ',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13.5)),
+                const SizedBox(height: 28),
                 Row(
                   children: [
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(8),
+                          color: AppColors.ink,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: const Text('เข้าสู่ระบบ',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white)),
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                        onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const RegisterScreen())),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(8),
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
-                          child: const Text('สมัครสมาชิก', textAlign: TextAlign.center),
+                          child: Text('สมัครสมาชิก',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Colors.grey.shade800, fontWeight: FontWeight.w600)),
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
-                TextField(
+                AppTextField(
                   controller: _emailCtrl,
-                  decoration: const InputDecoration(
-                      labelText: 'Email', border: OutlineInputBorder()),
+                  hint: 'Email',
+                  icon: Icons.mail_outline_rounded,
+                  keyboardType: TextInputType.emailAddress,
                 ),
-                const SizedBox(height: 16),
-                TextField(
+                const SizedBox(height: 14),
+                AppTextField(
                   controller: _passCtrl,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                      labelText: 'Password', border: OutlineInputBorder()),
+                  hint: 'Password',
+                  icon: Icons.lock_outline_rounded,
+                  obscureText: _obscure,
+                  toggleObscure: () => setState(() => _obscure = !_obscure),
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: 8),
-                  Text(_error!, style: const TextStyle(color: Colors.red)),
+                  const SizedBox(height: 14),
+                  MessageBanner(text: _error!),
                 ],
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: _handleLogin,
-                    child: const Text('Sign In', style: TextStyle(color: Colors.white)),
-                  ),
+                const SizedBox(height: 22),
+                PrimaryButton(
+                  label: 'Sign In',
+                  loading: _loading,
+                  onPressed: _handleLogin,
                 ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('Forgot password?'),
+                const SizedBox(height: 8),
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+                    child: Text('Forgot password?',
+                        style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+                  ),
                 ),
               ],
             ),

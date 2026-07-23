@@ -18,9 +18,30 @@ class CategoryModel {
     required this.icon,
     this.description,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type == CategoryType.income ? 'income' : 'expense',
+      'icon_code': icon.codePoint,
+      'description': description,
+    };
+  }
+
+  factory CategoryModel.fromMap(Map<String, dynamic> map) {
+    return CategoryModel(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      type: map['type'] == 'income' ? CategoryType.income : CategoryType.expense,
+      // หมายเหตุ: ไอคอนมาตรฐานของ Icons.* ใช้ fontFamily 'MaterialIcons'
+      icon: IconData(map['icon_code'] as int, fontFamily: 'MaterialIcons'),
+      description: map['description'] as String?,
+    );
+  }
 }
 
-/// หมวดหมู่เริ่มต้นของระบบ (ผู้ใช้สามารถเพิ่มเองได้ผ่าน DataService)
+/// หมวดหมู่เริ่มต้นของระบบ (จะถูก seed ลง SQLite อัตโนมัติครั้งแรกที่เปิดแอป)
 final List<CategoryModel> defaultCategories = [
   CategoryModel(id: 'c01', name: 'อาหาร', type: CategoryType.expense, icon: Icons.restaurant),
   CategoryModel(id: 'c02', name: 'เครื่องดื่ม', type: CategoryType.expense, icon: Icons.local_cafe),
@@ -38,4 +59,7 @@ final List<CategoryModel> defaultCategories = [
   CategoryModel(id: 'c14', name: 'เงินเดือน', type: CategoryType.income, icon: Icons.payments),
   CategoryModel(id: 'c15', name: 'รายได้เสริม', type: CategoryType.income, icon: Icons.trending_up),
   CategoryModel(id: 'c16', name: 'โบนัส', type: CategoryType.income, icon: Icons.card_membership),
+  // หมวดหมู่รายจ่ายพิเศษ: ใช้บันทึกอัตโนมัติเมื่อผู้ใช้ "โอนเงินจริง" เข้าเป้าหมายการออม
+  // (ต้องใช้ id คงที่ 'c17' เพื่อให้ DataService ค้นหา/สร้างซ้ำได้อย่างสม่ำเสมอ)
+  CategoryModel(id: 'c17', name: 'เงินออม', type: CategoryType.expense, icon: Icons.savings),
 ];
