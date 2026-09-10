@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function validId(id) { return request.resource.data.id == id; }
+    match /users/{uid} {
+      allow get: if owner(uid);
+      allow create, update: if owner(uid) && validId(uid)
+        && !request.resource.data.keys().hasAny(['password', 'password_hash']);
+      allow delete: if owner(uid);
+      match /categories/{id} {
+        allow read, delete: if owner(uid);
+        allow create, update: if owner(uid) && validId(id)
+          && request.resource.data.name is string
+          && request.resource.data.type in ['income', 'expense'];
+      }
+    }
+    match /transactions/{id} {
+      allow read, delete: if owner(resource.data.user_id);
+      allow create: if owner(request.resource.data.user_id) && validTransaction(id);
+      allow update: if owner(resource.data.user_id)
+        && request.resource.data.user_id == resource.data.user_id && validTransaction(id);
+    }
+    function validTransaction(id) {
+      return validId(id) && request.resource.data.amount is number
+        && request.resource.data.amount > 0
+        && request.resource.data.type in ['income', 'expense']
+        && request.resource.data.category_id is string
+        && request.resource.data.date is string;
+    }
+    match /goals/{id} {
+      allow read, delete: if owner(resource.data.user_id);
+      allow create: if owner(request.resource.data.user_id) && validGoal(id);
+      allow update: if owner(resource.data.user_id)
+        && request.resource.data.user_id == resource.data.user_id && validGoal(id);
+    }
+    function validGoal(id) {
+      return validId(id) && request.resource.data.target_amount is number
+        && request.resource.data.target_amount > 0
+        && request.resource.data.saved_amount is number
+        && request.resource.data.saved_amount >= 0
+        && request.resource.data.saved_amount <= request.resource.data.target_amount
+        && request.resource.data.status in ['inProgress', 'completed'];
+    }
+  }
+}

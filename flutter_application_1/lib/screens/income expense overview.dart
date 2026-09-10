@@ -1,93 +1,196 @@
+import '../widgets/data_action.dart';
 import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+
 import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../services/data_service.dart';
-
+import '../widgets/period_selector.dart' show PastelCalendarDialog;
 
 const _palette = [
-  Colors.deepPurple, Colors.orange, Colors.teal, Colors.pink,
-  Colors.indigo, Colors.brown, Colors.cyan, Colors.lime,
+  Color(0xFF80A1D4),
+  Color(0xFFC08B9D),
+  Color(0xFFC1E4F3),
+  Color(0xFFFFE698),
+  Color(0xFF3D568F),
+  Color(0xFFE3B8C4),
+  Color(0xFF9BC4E0),
+  Color(0xFFEAD9A0),
 ];
 
-/// วิดเจ็ตแสดง Pie Chart สัดส่วนรายจ่าย + ประวัติรายการแบบจัดกลุ่มตามวัน (TODAY/YESTERDAY/...)
-/// แยกออกมาจาก [IncomeExpenseScreen] เพื่อให้ฝังใช้ซ้ำได้ทั้งเป็นหน้าเต็มจอ
-/// และฝังอยู่ใน AddIncomeExpenseScreen ตอนเลือกแท็บ "Expenses"
+/// วิดเจ็ตแสดง
+/// 1. Pie Chart สัดส่วนรายจ่าย
+/// 2. ประวัติรายการ
+/// 3. ตัวกรอง ทั้งหมด / รายรับ / รายจ่าย
+/// 4. ปฏิทินสำหรับดูรายการรายรับ/รายจ่ายในแต่ละวัน
 class IncomeExpenseOverview extends StatefulWidget {
-  const IncomeExpenseOverview({super.key});
+  /// ตัวกรองเริ่มต้นตอนเปิดหน้า (ใช้ตอนกดมาจากกล่องรายรับ/รายจ่ายในหน้า Wallet)
+  final HistoryFilter initialFilter;
+
+  const IncomeExpenseOverview({
+    super.key,
+    this.initialFilter = HistoryFilter.all,
+  });
 
   @override
-  State<IncomeExpenseOverview> createState() => _IncomeExpenseOverviewState();
+  State<IncomeExpenseOverview> createState() =>
+      _IncomeExpenseOverviewState();
 }
 
-class _IncomeExpenseOverviewState extends State<IncomeExpenseOverview> {
-  bool _showAll = true;
+class _IncomeExpenseOverviewState
+    extends State<IncomeExpenseOverview> {
+  // ============================================================
+  // ประเภทของ History
+  // ============================================================
+
+  late HistoryFilter _historyFilter;
+
+  // วันที่เลือกในปฏิทิน
+  DateTime _selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _historyFilter = widget.initialFilter;
+  }
 
   @override
   Widget build(BuildContext context) {
     final service = context.watch<DataService>();
-    final byCategory = service.expenseByCategory();
-    final entries = byCategory.entries.toList();
-    final total = entries.fold<double>(0, (sum, e) => sum + e.value);
 
-    final today = DateTime.now();
-    final list = _showAll ? service.transactions : service.transactionsForDay(today);
+    // ============================================================
+    // PIE CHART
+    // ============================================================
+
+    final byCategory = service.expenseByCategory();
+
+    final entries = byCategory.entries.toList();
+
+    final total = entries.fold<double>(
+      0,
+      (sum, e) => sum + e.value,
+    );
+
+    // ============================================================
+    // TRANSACTIONS
+    // ============================================================
+
+    final allTransactions = service.transactions;
+
+    final historyList = _getHistoryList(
+      allTransactions,
+    );
 
     return Column(
       children: [
+        // ========================================================
+        // PIE CHART
+        // ========================================================
+
         if (entries.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              0,
+            ),
             child: AppCard(
               padding: const EdgeInsets.all(14),
               child: SizedBox(
                 height: 186,
                 child: Row(
                   children: [
+                    // ==================================================
+                    // PIE
+                    // ==================================================
+
                     Expanded(
                       flex: 3,
                       child: PieChart(
                         PieChartData(
                           sectionsSpace: 2,
                           centerSpaceRadius: 30,
-                          sections: List.generate(entries.length, (i) {
-                            final e = entries[i];
-                            final pct = total == 0 ? 0 : (e.value / total) * 100;
-                            return PieChartSectionData(
-                              color: _palette[i % _palette.length],
-                              value: e.value,
-                              title: '${pct.toStringAsFixed(0)}%',
-                              radius: 58,
-                              titleStyle: const TextStyle(
-                                  color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
-                            );
-                          }),
+
+                          sections: List.generate(
+                            entries.length,
+                            (i) {
+                              final e = entries[i];
+
+                              final pct = total == 0
+                                  ? 0
+                                  : (e.value / total) * 100;
+
+                              return PieChartSectionData(
+                                color: _palette[
+                                    i % _palette.length],
+
+                                value: e.value,
+
+                                title:
+                                    '${pct.toStringAsFixed(0)}%',
+
+                                radius: 58,
+
+                                titleStyle:
+                                    const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
+
+                    // ==================================================
+                    // LEGEND
+                    // ==================================================
+
                     Expanded(
                       flex: 2,
                       child: ListView.builder(
                         itemCount: entries.length,
+
                         itemBuilder: (context, i) {
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 3),
+                            padding:
+                                const EdgeInsets.symmetric(
+                              vertical: 3,
+                            ),
                             child: Row(
                               children: [
                                 Container(
-                                    width: 9, height: 9,
-                                    decoration: BoxDecoration(
-                                      color: _palette[i % _palette.length],
-                                      shape: BoxShape.circle,
-                                    )),
+                                  width: 9,
+                                  height: 9,
+                                  decoration: BoxDecoration(
+                                    color: _palette[
+                                        i % _palette.length],
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+
                                 const SizedBox(width: 6),
+
                                 Expanded(
-                                    child: Text(entries[i].key.name,
-                                        style: const TextStyle(fontSize: 12),
-                                        overflow: TextOverflow.ellipsis)),
+                                  child: Text(
+                                    service.categoryName(
+                                      entries[i].key,
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color:
+                                          AppColors.textPrimary,
+                                    ),
+                                    overflow:
+                                        TextOverflow.ellipsis,
+                                  ),
+                                ),
                               ],
                             ),
                           );
@@ -100,147 +203,658 @@ class _IncomeExpenseOverviewState extends State<IncomeExpenseOverview> {
             ),
           )
         else
-          const EmptyState(icon: Icons.pie_chart_outline_rounded, text: 'ยังไม่มีข้อมูลรายจ่าย'),
-        const SizedBox(height: 6),
-        Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black26),
-        const SizedBox(height: 6),
+          EmptyState(
+            icon: Icons.pie_chart_outline_rounded,
+            text: service.t('no_expense_data'),
+          ),
+
+        const SizedBox(height: 12),
+
+        // ========================================================
+        // HISTORY HEADER + MENU
+        // ========================================================
+
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text('History', style: AppTextStyles.heading),
-              const SizedBox(height: 12),
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _segmentOption('All', _showAll, () => setState(() => _showAll = true)),
-                      _segmentOption('Daily', !_showAll, () => setState(() => _showAll = false)),
-                    ],
-                  ),
+              // ----------------------------------------------------
+              // หัวข้อ "ประวัติ"
+              // ----------------------------------------------------
+
+              Expanded(
+                child: Row(
+                  children: [
+                    Text(
+                      service.t('history'),
+                      style: AppTextStyles.heading,
+                    ),
+
+                    const SizedBox(width: 6),
+
+                    Icon(
+                      Icons.favorite_rounded,
+                      size: 15,
+                      color: AppColors.accentPink,
+                    ),
+                  ],
                 ),
               ),
+
+              // ----------------------------------------------------
+              // เมนูชิดขวา
+              // ----------------------------------------------------
+
+              _historyMenu(service),
             ],
           ),
         ),
+
         const SizedBox(height: 12),
+
+        // ========================================================
+        // CONTENT
+        // ========================================================
+
         Expanded(
-          child: list.isEmpty
-              ? const EmptyState(icon: Icons.receipt_long_outlined, text: 'ยังไม่มีรายการ')
-              : ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: _buildGroupedHistory(list),
+          child: _historyFilter == HistoryFilter.all
+              ? _buildAllHistory(
+                  historyList,
+                )
+              : _buildFilteredHistory(
+                  historyList,
+                  service,
                 ),
         ),
       ],
     );
   }
 
-  /// จัดกลุ่มรายการตามวัน แล้วสร้างหัวข้อ TODAY / YESTERDAY / วันที่
-  List<Widget> _buildGroupedHistory(List<TransactionModel> list) {
-    final widgets = <Widget>[];
-    DateTime? currentDay;
+  // ==============================================================
+  // HISTORY MENU
+  // ==============================================================
 
-    for (final t in list) {
-      final day = DateTime(t.date.year, t.date.month, t.date.day);
-      if (currentDay == null || day != currentDay) {
-        if (currentDay != null) widgets.add(const SizedBox(height: 8));
-        widgets.add(Padding(
-          padding: const EdgeInsets.only(bottom: 8, top: 4),
-          child: Text(
-            _dayLabel(day),
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                letterSpacing: 1,
-                color: Colors.grey.shade700),
-          ),
-        ));
-        currentDay = day;
-      }
-      widgets.add(_historyTile(t));
-      widgets.add(const SizedBox(height: 8));
-    }
-    return widgets;
-  }
-
-  String _dayLabel(DateTime day) {
-    final today = DateTime.now();
-    final todayDay = DateTime(today.year, today.month, today.day);
-    final yesterday = todayDay.subtract(const Duration(days: 1));
-    if (day == todayDay) return 'TODAY';
-    if (day == yesterday) return 'YESTERDAY';
-    return DateFormat('d MMM yyyy').format(day).toUpperCase();
-  }
-
-  Widget _historyTile(TransactionModel t) {
-    final isIncome = t.type == CategoryType.income;
+  Widget _historyMenu(DataService service) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.all(3),
+
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Colors.black54),
-              const SizedBox(width: 4),
-              Text(DateFormat('HH:mm').format(t.date),
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-              const Spacer(),
-              Text(
-                '${isIncome ? '+' : '-'}฿${t.amount.toStringAsFixed(0)}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12.5,
-                  color: isIncome ? AppColors.income : AppColors.expense,
-                ),
-              ),
-            ],
+        color: AppColors.card,
+
+        borderRadius: BorderRadius.circular(
+          AppRadius.pill,
+        ),
+
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 15,
-                backgroundColor: Colors.black,
-                child: Icon(t.category.icon, color: Colors.white, size: 15),
-              ),
-              const SizedBox(width: 8),
-              Text(t.category.name, style: const TextStyle(fontSize: 13)),
-            ],
+        ],
+      ),
+
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _historyMenuItem(
+            label: 'ทั้งหมด',
+            selected: _historyFilter == HistoryFilter.all,
+            onTap: () {
+              setState(() {
+                _historyFilter = HistoryFilter.all;
+              });
+            },
+          ),
+
+          _historyMenuItem(
+            label: 'รายรับ',
+            selected:
+                _historyFilter == HistoryFilter.income,
+            onTap: () {
+              setState(() {
+                _historyFilter =
+                    HistoryFilter.income;
+
+                // เมื่อเข้าเมนูรายรับ
+                // ให้ใช้วันที่วันนี้เป็นค่าเริ่มต้น
+                _selectedDate = DateTime.now();
+              });
+            },
+          ),
+
+          _historyMenuItem(
+            label: 'รายจ่าย',
+            selected:
+                _historyFilter == HistoryFilter.expense,
+            onTap: () {
+              setState(() {
+                _historyFilter =
+                    HistoryFilter.expense;
+
+                // เมื่อเข้าเมนูรายจ่าย
+                // ให้ใช้วันที่วันนี้เป็นค่าเริ่มต้น
+                _selectedDate = DateTime.now();
+              });
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _segmentOption(String label, bool selected, VoidCallback onTap) {
+  // ==============================================================
+  // HISTORY MENU ITEM
+  // ==============================================================
+
+  Widget _historyMenuItem({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
+
+      behavior: HitTestBehavior.opaque,
+
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? Colors.black : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.pill),
+        duration: const Duration(
+          milliseconds: 180,
         ),
-        child: Text(label,
-            style: TextStyle(
-                color: selected ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.w600,
-                fontSize: 13)),
+
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 7,
+        ),
+
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.accentDeep
+              : Colors.transparent,
+
+          borderRadius: BorderRadius.circular(
+            AppRadius.pill,
+          ),
+        ),
+
+        child: Text(
+          label,
+
+          style: TextStyle(
+            color: selected
+                ? Colors.white
+                : AppColors.textPrimary,
+
+            fontWeight: FontWeight.w600,
+
+            fontSize: 12,
+          ),
+        ),
       ),
     );
   }
+
+  // ==============================================================
+  // GET HISTORY LIST
+  // ==============================================================
+
+  List<TransactionModel> _getHistoryList(
+    List<TransactionModel> transactions,
+  ) {
+    switch (_historyFilter) {
+      case HistoryFilter.all:
+        return transactions;
+
+      case HistoryFilter.income:
+        return transactions
+            .where(
+              (t) =>
+                  t.type == CategoryType.income,
+            )
+            .toList();
+
+      case HistoryFilter.expense:
+        return transactions
+            .where(
+              (t) =>
+                  t.type == CategoryType.expense,
+            )
+            .toList();
+    }
+  }
+
+  // ==============================================================
+  // ALL HISTORY
+  // ==============================================================
+
+  Widget _buildAllHistory(
+    List<TransactionModel> list,
+  ) {
+    if (list.isEmpty) {
+      return EmptyState(
+        icon: Icons.receipt_long_outlined,
+        text: 'ยังไม่มีรายการ',
+      );
+    }
+
+    return RefreshIndicator(
+      color: AppColors.accentDeep,
+      backgroundColor: AppColors.card,
+      onRefresh: _onRefresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+        ),
+
+        children: _buildGroupedHistory(
+          list,
+        ),
+      ),
+    );
+  }
+
+  // ==============================================================
+  // FILTERED HISTORY
+  //
+  // รายรับ / รายจ่าย
+  // แสดง Calendar + รายการของวันที่เลือก
+  // ==============================================================
+
+  Widget _buildFilteredHistory(
+    List<TransactionModel> list,
+    DataService service,
+  ) {
+    final selectedTransactions = list.where(
+      (t) => _isSameDay(
+        t.date,
+        _selectedDate,
+      ),
+    ).toList();
+
+    return RefreshIndicator(
+      color: AppColors.accentDeep,
+      backgroundColor: AppColors.card,
+      onRefresh: _onRefresh,
+      child: ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+      ),
+
+      children: [
+        // ====================================================
+        // ปุ่มเลือกวันที่ (เม็ดยา) — กดแล้วเปิดปฏิทินป๊อปอัพ
+        // สไตล์เดียวกับหน้าแรก/หน้าสถิติ (PeriodFilterBar._pickDay)
+        // ====================================================
+
+        _dateSelectorPill(service),
+
+        const SizedBox(height: 12),
+
+        if (selectedTransactions.isEmpty)
+          EmptyState(
+            icon: Icons.receipt_long_outlined,
+            text: 'ไม่มีรายการในวันนี้',
+          )
+        else
+          ...selectedTransactions.map(
+            (t) => Padding(
+              padding: const EdgeInsets.only(
+                bottom: 8,
+              ),
+              child: _historyTile(t),
+            ),
+          ),
+      ],
+      ),
+    );
+  }
+
+  Future<void> _onRefresh() async {
+    await refreshAppData(context);
+    if (mounted) setState(() {});
+  }
+
+  // ==============================================================
+  // ปุ่มเม็ดยาแสดงวันที่ที่เลือก (เหมือนหน้าแรก/หน้าสถิติ)
+  // ==============================================================
+
+  Widget _dateSelectorPill(DataService service) {
+    final dateText = DateFormat(
+      'd MMM yyyy',
+      'th',
+    ).format(_selectedDate);
+
+    return GestureDetector(
+      onTap: () => _pickDate(context, service),
+
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 9,
+        ),
+
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(
+            AppRadius.pill,
+          ),
+        ),
+
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.calendar_today_rounded,
+              size: 14,
+              color: AppColors.textSecondary,
+            ),
+
+            const SizedBox(width: 8),
+
+            Text(
+              dateText,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12.5,
+                color: AppColors.textPrimary,
+              ),
+            ),
+
+            const SizedBox(width: 6),
+
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: AppColors.textMuted,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==============================================================
+  // ปฏิทินป๊อปอัพ — ใช้การ์ดพาสเทล "เลือกวันที่" ชุดเดียวกับหน้าแรก/สถิติ
+  // (PastelCalendarDialog จาก widgets/period_selector.dart) เพื่อให้หน้าตา
+  // เหมือนกันทุกจุดในแอป ไม่มีปฏิทินคนละแบบให้สับสน
+  // ==============================================================
+
+  Future<void> _pickDate(BuildContext context, DataService service) async {
+    final isThai = service.currentLanguage != 'English';
+
+    final picked = await showDialog<DateTime>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.45),
+      builder: (_) => PastelCalendarDialog(
+        initialDate: _selectedDate,
+        firstDate: DateTime(2000),
+        lastDate: DateTime.now(),
+        isThai: isThai,
+      ),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  // ==============================================================
+  // GROUPED HISTORY
+  //
+  // ใช้เฉพาะเมนู "ทั้งหมด"
+  // ==============================================================
+
+  List<Widget> _buildGroupedHistory(
+    List<TransactionModel> list,
+  ) {
+    final widgets = <Widget>[];
+
+    DateTime? currentDay;
+
+    for (final t in list) {
+      final day = DateTime(
+        t.date.year,
+        t.date.month,
+        t.date.day,
+      );
+
+      if (currentDay == null ||
+          day != currentDay) {
+        if (currentDay != null) {
+          widgets.add(
+            const SizedBox(height: 8),
+          );
+        }
+
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(
+              bottom: 8,
+              top: 4,
+            ),
+
+            child: Text(
+              _dayLabel(day),
+
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                letterSpacing: 1,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        );
+
+        currentDay = day;
+      }
+
+      widgets.add(
+        _historyTile(t),
+      );
+
+      widgets.add(
+        const SizedBox(height: 8),
+      );
+    }
+
+    return widgets;
+  }
+
+  // ==============================================================
+  // DAY LABEL
+  // ==============================================================
+
+  String _dayLabel(
+    DateTime day,
+  ) {
+    final service =
+        context.read<DataService>();
+
+    final today = DateTime.now();
+
+    final todayDay = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    );
+
+    final yesterday =
+        todayDay.subtract(
+      const Duration(days: 1),
+    );
+
+    if (_isSameDay(day, todayDay)) {
+      return service.t('today');
+    }
+
+    if (_isSameDay(day, yesterday)) {
+      return service.t('yesterday');
+    }
+
+    return DateFormat(
+      'd MMM yyyy',
+    ).format(day).toUpperCase();
+  }
+
+  // ==============================================================
+  // HISTORY TILE
+  // ==============================================================
+
+  Widget _historyTile(
+    TransactionModel t,
+  ) {
+    final service =
+        context.read<DataService>();
+
+    final isIncome =
+        t.type == CategoryType.income;
+
+    // ============================================================
+    // รายรับ = เขียว
+    // รายจ่าย = แดง
+    // ============================================================
+
+    final accent = isIncome
+        ? AppColors.income
+        : AppColors.expense;
+
+    final accentBg = isIncome
+        ? AppColors.incomeBg
+        : AppColors.expenseBg;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+        vertical: 12,
+      ),
+
+      decoration: BoxDecoration(
+        color: AppColors.card,
+
+        borderRadius: BorderRadius.circular(
+          AppRadius.lg,
+        ),
+
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+
+      child: Row(
+        children: [
+          // ======================================================
+          // ICON
+          // ======================================================
+
+          CircleAvatar(
+            radius: 18,
+
+            backgroundColor: accentBg,
+
+            child: CategoryIcon(
+              category: t.category,
+              color: accent,
+              size: 17,
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          // ======================================================
+          // NAME + TIME
+          // ======================================================
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+
+              children: [
+                Text(
+                  service.categoryName(
+                    t.category,
+                  ),
+
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: AppColors.textPrimary,
+                  ),
+
+                  maxLines: 1,
+
+                  overflow:
+                      TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 2),
+
+                Text(
+                  DateFormat(
+                    'HH:mm',
+                  ).format(t.date),
+
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // ======================================================
+          // AMOUNT
+          // ======================================================
+
+          Text(
+            '${isIncome ? '+' : '-'}${context.watch<DataService>().formatMoney(t.amount)}',
+
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12.5,
+              color: accent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==============================================================
+  // SAME DAY
+  // ==============================================================
+
+  bool _isSameDay(
+    DateTime a,
+    DateTime b,
+  ) {
+    return a.year == b.year &&
+        a.month == b.month &&
+        a.day == b.day;
+  }
+}
+
+// ==================================================================
+// HISTORY FILTER
+// ==================================================================
+
+enum HistoryFilter {
+  all,
+  income,
+  expense,
 }

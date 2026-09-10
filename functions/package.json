@@ -1,0 +1,7 @@
+{
+  "name": "budgetmate-receipts",
+  "private": true,
+  "main": "index.js",
+  "engines": {"node": "22"},
+  "dependencies": {"firebase-functions": "^6.0.0", "@google-cloud/vision": "^5.0.0"}
+}

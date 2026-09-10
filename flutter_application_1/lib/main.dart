@@ -1,10 +1,21 @@
+import 'package:budgetmate/firebase_options.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'services/data_service.dart';
 import 'screens/loading_screen.dart';
+import 'screens/app_theme.dart' show appFontFamily, AppColors, AppTheme;
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // เตรียมข้อมูล locale ภาษาไทยสำหรับ DateFormat (เช่น ชื่อเดือน/วันภาษาไทย)
+  // ต้องเรียกก่อน runApp ไม่งั้นจะเจอ LocaleDataException ตอนใช้ DateFormat(..., 'th')
+  await initializeDateFormatting('th', null);
+
   runApp(const BudgetMateApp());
 }
 
@@ -31,6 +42,8 @@ class BudgetMateApp extends StatelessWidget {
       create: (_) => DataService(),
       child: Consumer<DataService>(
         builder: (context, service, _) {
+          AppColors.brightness = service.themeMode == ThemeMode.dark
+              ? Brightness.dark : Brightness.light;
           return MaterialApp(
             title: 'BUDGETMATE',
             debugShowCheckedModeBanner: false,
@@ -40,7 +53,7 @@ class BudgetMateApp extends StatelessWidget {
               useMaterial3: true,
               colorSchemeSeed: Colors.black,
               brightness: Brightness.light,
-              fontFamily: 'Roboto',
+              fontFamily: appFontFamily,
               appBarTheme: const AppBarTheme(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
@@ -48,18 +61,7 @@ class BudgetMateApp extends StatelessWidget {
               ),
               scaffoldBackgroundColor: Colors.white,
             ),
-            darkTheme: ThemeData(
-              useMaterial3: true,
-              colorSchemeSeed: const Color.fromARGB(255, 253, 253, 252),
-              brightness: Brightness.dark,
-              fontFamily: 'Roboto',
-              appBarTheme: const AppBarTheme(
-                backgroundColor: Color(0xFF121212),
-                foregroundColor: Colors.white,
-                elevation: 0,
-              ),
-              scaffoldBackgroundColor: const Color(0xFF121212),
-            ),
+            darkTheme: AppTheme.dark,
             home: const LoadingScreen(),
           );
         },

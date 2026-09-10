@@ -1,123 +1,191 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// DBHelper - ชั้นเชื่อมต่อฐานข้อมูล SQLite (เก็บข้อมูลจริงลงเครื่อง)
-/// แทนที่ In-memory DataService เดิม ให้ข้อมูลไม่หายเมื่อปิดแอป
+
+const _dbTimeout = Duration(seconds: 10);
+
 class DBHelper {
   DBHelper._internal();
   static final DBHelper instance = DBHelper._internal();
 
-  Database? _db;
+  // The existing database is named 'default', without parentheses.
+  final FirebaseFirestore _fs = FirebaseFirestore.instanceFor(
+    app: Firebase.app(),
+    databaseId: 'default',
+  );
 
-  Future<Database> get database async {
-    if (_db != null) return _db!;
-    _db = await _initDB();
-    return _db!;
+  CollectionReference<Map<String, dynamic>> _col(String table) {
+    if (table == 'categories') {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) throw StateError('กรุณาเข้าสู่ระบบก่อน');
+      return _fs.collection('users').doc(uid).collection('categories');
+    }
+    return _fs.collection(table);
   }
 
-  Future<Database> _initDB() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'budgetmate.db');
-    return openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate,
-    );
+  /// Commit both records together and re-read the goal on concurrent updates.
+  Future<Map<String, dynamic>> transferToGoal(
+    String goalId, double amount, Map<String, dynamic> entry,
+  ) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null || entry['user_id'] != uid || !amount.isFinite || amount <= 0) {
+      throw StateError('ข้อมูลการโอนไม่ถูกต้อง');
+    }
+    final goalRef = _col('goals').doc(goalId);
+    return _fs.runTransaction((transaction) async {
+      final snapshot = await transaction.get(goalRef);
+      final data = snapshot.data();
+      if (data == null || data['user_id'] != uid) {
+        throw StateError('ไม่พบเป้าหมาย');
+      }
+      final saved = (data['saved_amount'] as num).toDouble() + amount;
+      final target = (data['target_amount'] as num).toDouble();
+      if (saved > target) throw StateError('จำนวนเงินเกินเป้าหมาย');
+      final updated = {...data, 'saved_amount': saved,
+        'status': saved >= target ? 'completed' : 'inProgress'};
+      transaction.update(goalRef, updated);
+      transaction.set(_col('transactions').doc(entry['id'] as String), entry);
+      return updated;
+    });
   }
 
-  Future<void> _onCreate(Database db, int version) async {
-    // Entity: User (บทที่ 3 - user_id, name, email, password, created_at, language, currency)
-    await db.execute('''
-      CREATE TABLE users (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        language TEXT NOT NULL DEFAULT 'ไทย',
-        currency TEXT NOT NULL DEFAULT 'THB'
-      )
-    ''');
-
-    // Entity: Category (category_id, category_name, category_type)
-    await db.execute('''
-      CREATE TABLE categories (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        type TEXT NOT NULL,
-        icon_code INTEGER NOT NULL,
-        description TEXT
-      )
-    ''');
-
-    // Entity: Transaction (transaction_id, type, amount, category_id FK, date, note, description)
-    await db.execute('''
-      CREATE TABLE transactions (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        type TEXT NOT NULL,
-        amount REAL NOT NULL,
-        category_id TEXT NOT NULL,
-        date TEXT NOT NULL,
-        note TEXT,
-        description TEXT,
-        receipt_path TEXT,
-        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-        FOREIGN KEY (category_id) REFERENCES categories (id)
-      )
-    ''');
-
-    // Entity: Goal_Saving (goal_id, goal_name, target_amount, saved_amount, start_date, target_date, status)
-    await db.execute('''
-      CREATE TABLE goals (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        name TEXT NOT NULL,
-        target_amount REAL NOT NULL,
-        saved_amount REAL NOT NULL DEFAULT 0,
-        start_date TEXT NOT NULL,
-        target_date TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'inProgress',
-        icon_code INTEGER NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-      )
-    ''');
+ 
+  Never _handleError(Object e, StackTrace st, String fallbackMessage) {
+  
+    debugPrint('[DBHelper] RAW ERROR TYPE=${e.runtimeType} VALUE=$e');
+    if (e is TimeoutException) {
+      debugPrint('[DBHelper] TIMEOUT after ${_dbTimeout.inSeconds}s: $fallbackMessage');
+      throw Exception('$fallbackMessage (หมดเวลา) - เช็คอินเทอร์เน็ต');
+    }
+    if (e is FirebaseException) {
+      debugPrint('[DBHelper] FirebaseException code=${e.code} message=${e.message}');
+      switch (e.code) {
+        case 'permission-denied':
+          throw Exception('$fallbackMessage (ไม่มีสิทธิ์เข้าถึงข้อมูล - ตรวจสอบ Firestore Security Rules)');
+        case 'unavailable':
+          throw Exception('$fallbackMessage (เชื่อมต่อ Firestore ไม่ได้ - เช็คอินเทอร์เน็ต/สถานะ Firebase)');
+        case 'failed-precondition':
+          // เกิดเมื่อ query ใช้ where + orderBy คนละ field กัน (เช่น where('user_id')
+          // ร่วมกับ orderBy('date')) ซึ่ง Firestore บังคับให้ต้องสร้าง Composite Index
+          // ก่อนใช้งานจริง ข้อความ e.message ของ Firebase จะมีลิงก์สำหรับกดสร้าง index
+          // อัตโนมัติแนบมาด้วย ให้เปิดลิงก์นั้นในเบราว์เซอร์แล้วกด "Create Index" ได้เลย
+          throw Exception(
+              '$fallbackMessage (ต้องสร้าง Firestore Index ก่อนใช้งาน query นี้ - '
+              'เปิดลิงก์ในข้อความต่อไปนี้เพื่อสร้าง index อัตโนมัติ: ${e.message})');
+        default:
+          throw Exception('$fallbackMessage (${e.code}: ${e.message})');
+      }
+    }
+    debugPrint('[DBHelper] Unexpected error: $e\n$st');
+    throw Exception('$fallbackMessage ($e)');
   }
 
   // ---------------- Generic CRUD helpers ----------------
+  // ใช้ data['id'] เป็น document id เสมอ (โค้ดเดิมสร้าง id ด้วย uuid อยู่แล้ว)
   Future<int> insert(String table, Map<String, dynamic> data) async {
-    final db = await database;
-    return db.insert(table, data, conflictAlgorithm: ConflictAlgorithm.replace);
+    final id = data['id'] as String;
+    try {
+      await _col(table).doc(id).set(data);
+      return 1;
+    } catch (e, st) {
+      _handleError(e, st, 'บันทึกไม่สำเร็จ');
+    }
   }
 
+  // เพิ่มหลายรายการในครั้งเดียวด้วย WriteBatch (1 round-trip แทนที่จะยิงทีละรายการ)
+  // Firestore batch รองรับสูงสุด 500 operations ต่อ batch จึงแบ่งเป็นชุดๆ ถ้าเผื่อไว้
+  Future<void> insertBatch(String table, List<Map<String, dynamic>> items) async {
+    if (items.isEmpty) return;
+    const chunkSize = 450;
+    for (int i = 0; i < items.length; i += chunkSize) {
+      final chunk = items.sublist(i, i + chunkSize > items.length ? items.length : i + chunkSize);
+      final batch = _fs.batch();
+      for (final data in chunk) {
+        final id = data['id'] as String;
+        batch.set(_col(table).doc(id), data);
+      }
+      try {
+        await batch.commit();
+      } catch (e, st) {
+        _handleError(e, st, 'บันทึกไม่สำเร็จ');
+      }
+    }
+  }
+
+  // รองรับเฉพาะ where แบบ 'field = ?' กับ whereArgs 1 ค่า (ตรงกับที่ใช้ทั้งโปรเจกต์)
   Future<List<Map<String, dynamic>>> query(
     String table, {
     String? where,
     List<Object?>? whereArgs,
     String? orderBy,
   }) async {
-    final db = await database;
-    return db.query(table, where: where, whereArgs: whereArgs, orderBy: orderBy);
+    if (where?.trim() == 'id = ?' && whereArgs?.length == 1) {
+      try {
+        final snapshot = await _col(table).doc(whereArgs!.first.toString())
+            .get().timeout(_dbTimeout);
+        final data = snapshot.data();
+        return data == null ? [] : [data];
+      } catch (e, st) {
+        _handleError(e, st, 'โหลดข้อมูลไม่สำเร็จ');
+      }
+    }
+    Query<Map<String, dynamic>> q = _col(table);
+
+    if (where != null && whereArgs != null && whereArgs.isNotEmpty) {
+      final field = where.split('=').first.trim();
+      q = q.where(field, isEqualTo: whereArgs.first);
+    }
+
+    if (orderBy != null && orderBy.trim().isNotEmpty) {
+      final parts = orderBy.trim().split(RegExp(r'\s+'));
+      final field = parts[0];
+      final desc = parts.length > 1 && parts[1].toUpperCase() == 'DESC';
+      q = q.orderBy(field, descending: desc);
+    }
+
+    try {
+      final snap = await q.get().timeout(_dbTimeout);
+      return snap.docs.map((d) => d.data()).toList();
+    } catch (e, st) {
+      _handleError(e, st, 'โหลดข้อมูลไม่สำเร็จ');
+    }
   }
 
+  // รองรับเฉพาะ where = 'id = ?' (ตรงกับที่ใช้ทั้งโปรเจกต์)
   Future<int> update(
     String table,
     Map<String, dynamic> data,
     String where,
     List<Object?> whereArgs,
   ) async {
-    final db = await database;
-    return db.update(table, data, where: where, whereArgs: whereArgs);
+    final id = whereArgs.first.toString();
+    try {
+      await _col(table).doc(id).update(data);
+      return 1;
+    } catch (e, st) {
+      _handleError(e, st, 'บันทึกไม่สำเร็จ');
+    }
   }
 
   Future<int> delete(String table, String where, List<Object?> whereArgs) async {
-    final db = await database;
-    return db.delete(table, where: where, whereArgs: whereArgs);
+    final id = whereArgs.first.toString();
+    try {
+      await _col(table).doc(id).delete();
+      return 1;
+    } catch (e, st) {
+      _handleError(e, st, 'ลบไม่สำเร็จ');
+    }
   }
 
   Future<int> count(String table) async {
-    final db = await database;
-    final result = await db.rawQuery('SELECT COUNT(*) as c FROM $table');
-    return Sqflite.firstIntValue(result) ?? 0;
+    try {
+      final agg = await _col(table).count().get().timeout(_dbTimeout);
+      return agg.count ?? 0;
+    } catch (e, st) {
+      _handleError(e, st, 'นับจำนวนรายการไม่สำเร็จ');
+    }
   }
 }

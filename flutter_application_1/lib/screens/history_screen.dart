@@ -1,3 +1,4 @@
+import '../widgets/data_action.dart';
 import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -26,12 +27,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final list = _showAll ? all : service.transactionsForDay(today);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         elevation: 0,
-        foregroundColor: Colors.black,
-        title: const Text('History', style: TextStyle(fontWeight: FontWeight.w600)),
+        foregroundColor: AppColors.textPrimary,
+        title: Text(service.t('history'),
+            style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
       ),
       body: Column(
         children: [
@@ -39,29 +41,49 @@ class _HistoryScreenState extends State<HistoryScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                _filterChip('All', _showAll, () => setState(() => _showAll = true)),
+                _filterChip(service.t('filter_all'), _showAll, () => setState(() => _showAll = true)),
                 const SizedBox(width: 8),
-                _filterChip('Daily', !_showAll, () => setState(() => _showAll = false)),
+                _filterChip(service.t('filter_daily'), !_showAll, () => setState(() => _showAll = false)),
               ],
             ),
           ),
           Expanded(
-            child: list.isEmpty
-                ? const EmptyState(icon: Icons.receipt_long_outlined, text: 'ยังไม่มีรายการ')
-                : ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: list.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, index) {
-                      final t = list[index];
-                      return _transactionTile(context, t, service);
-                    },
-                  ),
+            child: RefreshIndicator(
+              color: AppColors.accentDeep,
+              backgroundColor: AppColors.card,
+              onRefresh: _onRefresh,
+              child: list.isEmpty
+                  // ListView ว่างเปล่ายังต้องใส่ physics แบบ Always... ไม่งั้นจะดึง
+                  // เพื่อรีเฟรชไม่ได้เลยเพราะไม่มีเนื้อหาให้เลื่อน
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        EmptyState(
+                            icon: Icons.receipt_long_outlined,
+                            text: service.t('no_transactions')),
+                      ],
+                    )
+                  : ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: list.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final t = list[index];
+                        return _transactionTile(context, t, service);
+                      },
+                    ),
+            ),
           ),
         ],
       ),
       bottomNavigationBar: const BottomNav(currentIndex: 0),
     );
+  }
+
+  Future<void> _onRefresh() async {
+    await refreshAppData(context);
+    if (mounted) setState(() {});
   }
 
   Widget _filterChip(String label, bool selected, VoidCallback onTap) {
@@ -71,12 +93,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
         decoration: BoxDecoration(
-          color: selected ? Colors.black : AppColors.surface,
+          color: selected ? AppColors.accentDeep : AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.pill),
         ),
         child: Text(label,
             style: TextStyle(
-                color: selected ? Colors.white : Colors.black87,
+                color: selected ? Colors.white : AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13)),
       ),
@@ -97,22 +119,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
         padding: const EdgeInsets.only(right: 20),
         child: Icon(Icons.delete_outline_rounded, color: AppColors.danger),
       ),
-      onDismissed: (_) async => service.deleteTransaction(t.id),
+      confirmDismiss: (_) async {
+                    try {
+                      await service.deleteTransaction(t.id);
+                      return true;
+                    } catch (e) {
+                      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${service.t('save_failed')}: $e')));
+                      return false;
+                    }
+                  },
       child: AppCard(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           leading: CircleAvatar(
             backgroundColor: isIncome ? AppColors.incomeBg : AppColors.expenseBg,
-            child: Icon(t.category.icon,
+            child: CategoryIcon(category: t.category,
                 color: isIncome ? AppColors.income : AppColors.expense),
           ),
-          title: Text(t.category.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+          title: Text(service.categoryName(t.category),
+              style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
           subtitle: Text(
               '${DateFormat('d MMM yyyy').format(t.date)}${t.note != null ? ' • ${t.note}' : ''}',
               style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
           trailing: Text(
-            '${isIncome ? '+' : '-'}฿${t.amount.toStringAsFixed(2)}',
+            '${isIncome ? '+' : '-'}${service.formatMoney(t.amount)}',
             style: TextStyle(
               color: isIncome ? AppColors.income : AppColors.expense,
               fontWeight: FontWeight.bold,

@@ -25,23 +25,24 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   Future<void> _submit() async {
     if (_loading) return;
+    final service = context.read<DataService>();
     if (_currentCtrl.text.isEmpty) {
       setState(() {
-        _error = 'กรุณากรอกรหัสผ่านเดิม';
+        _error = service.t('enter_current_password');
         _success = null;
       });
       return;
     }
     if (_newCtrl.text.length < 6) {
       setState(() {
-        _error = 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร';
+        _error = service.t('password_min_length');
         _success = null;
       });
       return;
     }
     if (_newCtrl.text != _confirmCtrl.text) {
       setState(() {
-        _error = 'รหัสผ่านใหม่ไม่ตรงกัน';
+        _error = service.t('password_mismatch');
         _success = null;
       });
       return;
@@ -53,14 +54,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       _success = null;
     });
 
-    final service = context.read<DataService>();
     final error = await service.changePassword(_currentCtrl.text, _newCtrl.text);
 
     if (!mounted) return;
     if (error == null) {
       setState(() {
         _loading = false;
-        _success = 'เปลี่ยนรหัสผ่านสำเร็จ';
+        _success = service.t('change_password_success');
       });
       _currentCtrl.clear();
       _newCtrl.clear();
@@ -75,13 +75,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final service = context.watch<DataService>();
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         elevation: 0,
-        foregroundColor: Colors.black,
-        title: const Text('Password & Security', style: TextStyle(fontWeight: FontWeight.w600)),
+        foregroundColor: AppColors.textPrimary,
+        title: Text(service.t('password_security'),
+            style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -91,28 +93,28 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             children: [
               const HeaderIconBadge(icon: Icons.shield_outlined),
               const SizedBox(height: 24),
-              _label('รหัสผ่านเดิม'),
+              _label(service.t('current_password')),
               AppTextField(
                 controller: _currentCtrl,
-                hint: 'กรอกรหัสผ่านปัจจุบัน',
+                hint: service.t('current_password_hint'),
                 icon: Icons.lock_outline_rounded,
                 obscureText: _obscureCurrent,
                 toggleObscure: () => setState(() => _obscureCurrent = !_obscureCurrent),
               ),
               const SizedBox(height: 16),
-              _label('รหัสผ่านใหม่'),
+              _label(service.t('new_password')),
               AppTextField(
                 controller: _newCtrl,
-                hint: 'อย่างน้อย 6 ตัวอักษร',
+                hint: service.t('new_password_hint'),
                 icon: Icons.lock_reset_rounded,
                 obscureText: _obscureNew,
                 toggleObscure: () => setState(() => _obscureNew = !_obscureNew),
               ),
               const SizedBox(height: 16),
-              _label('ยืนยันรหัสผ่านใหม่'),
+              _label(service.t('confirm_new_password')),
               AppTextField(
                 controller: _confirmCtrl,
-                hint: 'กรอกรหัสผ่านใหม่อีกครั้ง',
+                hint: service.t('confirm_new_password_hint'),
                 icon: Icons.lock_reset_rounded,
                 obscureText: _obscureConfirm,
                 toggleObscure: () => setState(() => _obscureConfirm = !_obscureConfirm),
@@ -126,7 +128,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 MessageBanner(text: _success!, isError: false),
               ],
               const SizedBox(height: 24),
-              PrimaryButton(label: 'บันทึกรหัสผ่านใหม่', loading: _loading, onPressed: _submit),
+              PrimaryButton(label: service.t('save_new_password'), loading: _loading, onPressed: _submit),
             ],
           ),
         ),
@@ -136,6 +138,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   Widget _label(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 8, left: 4),
-        child: Text(text, style: AppTextStyles.label.copyWith(color: Colors.grey.shade800)),
+        child: Text(text, style: AppTextStyles.label.copyWith(color: AppColors.textSecondary)),
       );
 }

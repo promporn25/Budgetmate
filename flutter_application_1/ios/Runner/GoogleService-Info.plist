@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>636277696280-2r1tehf0qj7okml610e5t7909q1sonve.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.636277696280-2r1tehf0qj7okml610e5t7909q1sonve</string>
+	<key>API_KEY</key>
+	<string>AIzaSyD_bR-20sEJp6CpbU7Bgh9poAtBHnsMREQ</string>
+	<key>GCM_SENDER_ID</key>
+	<string>636277696280</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.promporn.budgetmate</string>
+	<key>PROJECT_ID</key>
+	<string>budgetmate-app-a94da</string>
+	<key>STORAGE_BUCKET</key>
+	<string>budgetmate-app-a94da.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:636277696280:ios:15564d6417db857fa1206d</string>
+</dict>
+</plist>

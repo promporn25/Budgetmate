@@ -2,6 +2,7 @@ import 'category_model.dart';
 
 /// เอนทิตี้ Transaction ตามพจนานุกรมข้อมูลในเอกสารบทที่ 3
 class TransactionModel {
+  final String? currency;
   final String id; // transaction_id
   final CategoryType type; // type (รายรับ / รายจ่าย)
   final double amount; // amount
@@ -13,6 +14,7 @@ class TransactionModel {
 
   const TransactionModel({
     required this.id,
+    this.currency,
     required this.type,
     required this.amount,
     required this.category,
@@ -33,6 +35,7 @@ class TransactionModel {
   }) {
     return TransactionModel(
       id: id,
+      currency: currency,
       type: type ?? this.type,
       amount: amount ?? this.amount,
       category: category ?? this.category,
@@ -46,6 +49,7 @@ class TransactionModel {
   Map<String, dynamic> toMap(String userId) {
     return {
       'id': id,
+      'currency': currency,
       'user_id': userId,
       'type': type == CategoryType.income ? 'income' : 'expense',
       'amount': amount,
@@ -60,6 +64,7 @@ class TransactionModel {
   factory TransactionModel.fromMap(Map<String, dynamic> map, CategoryModel category) {
     return TransactionModel(
       id: map['id'] as String,
+      currency: map['currency'] as String?,
       type: map['type'] == 'income' ? CategoryType.income : CategoryType.expense,
       amount: (map['amount'] as num).toDouble(),
       category: category,

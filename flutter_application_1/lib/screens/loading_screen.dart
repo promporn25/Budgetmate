@@ -1,9 +1,9 @@
+import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/data_service.dart';
 import 'login_screen.dart';
 import 'home_screen.dart';
-import 'language_setup_screen.dart';
 
 /// หน้า Loading (3.4.1) - เริ่มต้นฐานข้อมูล SQLite และตรวจสอบ session ที่ล็อกอินค้างไว้
 class LoadingScreen extends StatefulWidget {
@@ -24,9 +24,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final service = context.read<DataService>();
     final started = DateTime.now();
 
-    await service.init(); // สร้างตาราง/seed หมวดหมู่ + กู้คืน session
+    await service.init(); // สร้างตาราง/seed หมวดหมู่ + กู้คืน session (จะตั้งค่า AppColors.brightness ให้ด้วย)
 
-    // ให้หน้า Loading แสดงอย่างน้อย 1.2 วินาที กันจอกระพริบเร็วเกินไป
     final elapsed = DateTime.now().difference(started);
     final remain = const Duration(milliseconds: 1200) - elapsed;
     if (remain > Duration.zero) {
@@ -37,11 +36,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     Widget nextScreen;
     if (service.currentUser != null) {
-      // มี session ล็อกอินค้างอยู่ -> เข้าหน้า Home ทันที
       nextScreen = const HomeScreen();
-    } else if (!(await service.isSetupCompleted())) {
-      // เปิดแอปครั้งแรก -> ให้ตั้งค่าภาษา/สกุลเงินก่อน
-      nextScreen = const LanguageSetupScreen();
     } else {
       nextScreen = const LoginScreen();
     }
@@ -49,14 +44,15 @@ class _LoadingScreenState extends State<LoadingScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => nextScreen),
+      noAnimationRoute(nextScreen),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final service = context.watch<DataService>();
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bg,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -65,7 +61,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.orange.shade50,
+                color: AppColors.accentBg,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -77,9 +73,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'BUDGETMATE',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+            Text(
+              service.t('app_name'),
+              style: TextStyle(
+                  fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 1.2, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 10),
             SizedBox(
@@ -87,7 +84,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
               height: 22,
               child: CircularProgressIndicator(
                 strokeWidth: 2.4,
-                color: Colors.orange.shade400,
+                color: AppColors.ink,
               ),
             ),
           ],

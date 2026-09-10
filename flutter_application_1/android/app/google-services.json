@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "636277696280",
+    "project_id": "budgetmate-app-a94da",
+    "storage_bucket": "budgetmate-app-a94da.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636277696280:android:cc79a1007baa596ba1206d",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "636277696280-4leasuhjt072gra43v9pvnj5arsi8fc8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0JWDJifYyt2RftAC-LugntNO70Zns8Nc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "636277696280-4leasuhjt072gra43v9pvnj5arsi8fc8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "636277696280-2r1tehf0qj7okml610e5t7909q1sonve.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.promporn.budgetmate"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
