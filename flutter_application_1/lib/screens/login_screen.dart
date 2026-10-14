@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../services/data_service.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
+import 'language_setup_screen.dart';
 
 /// หน้า Login (3.4.3) - เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน (ตรวจสอบกับ SQLite จริง)
 ///
@@ -42,8 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (error == null) {
-      Navigator.pushReplacement(
-          context, noAnimationRoute(const HomeScreen()));
+      Navigator.pushAndRemoveUntil(
+          context, noAnimationRoute(const HomeScreen()), (route) => false);
     } else {
       setState(() {
         _loading = false;
@@ -65,8 +66,12 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (error == null) {
-      Navigator.pushReplacement(
-          context, noAnimationRoute(const HomeScreen()));
+      Navigator.pushAndRemoveUntil(
+          context,
+          noAnimationRoute(service.googleLoginCreatedAccount
+              ? const LanguageSetupScreen()
+              : const HomeScreen()),
+          (route) => false);
     } else {
       setState(() {
         _googleLoading = false;
@@ -102,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -114,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         icon: Icons.account_balance_wallet_rounded,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     Text(service.t('app_name'),
                         textAlign: TextAlign.center, style: AppTextStyles.title),
                     const SizedBox(height: 6),
@@ -125,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     // การ์ดฟอร์มโค้งมนลอยตัว ให้ความรู้สึกนุ่มนวลอบอุ่นกว่าเดิม
                     Container(
-                      padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(AppRadius.md + 8),
@@ -149,14 +154,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             onLoginTap: () {},
                             onRegisterTap: _goToRegister,
                           ),
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 16),
                           AppTextField(
                             controller: _emailCtrl,
                             hint: service.t('email_hint'),
                             icon: Icons.mail_outline_rounded,
                             keyboardType: TextInputType.emailAddress,
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 12),
                           AppTextField(
                             controller: _passCtrl,
                             hint: service.t('password_hint'),
@@ -165,16 +170,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             toggleObscure: () => setState(() => _obscure = !_obscure),
                           ),
                           if (_error != null) ...[
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 12),
                             MessageBanner(text: _error!),
                           ],
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
                           PrimaryButton(
                             label: service.t('sign_in'),
                             loading: _loading,
                             onPressed: _handleLogin,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           Row(
                             children: [
                               Expanded(child: Divider(color: AppColors.border)),
@@ -187,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Expanded(child: Divider(color: AppColors.border)),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
                             height: 52,
@@ -206,7 +211,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: CircularProgressIndicator(
                                           strokeWidth: 2, color: AppColors.textPrimary))
                                   : Image.asset('assets/images/google_logo.png',
-                                      height: 20, width: 20),
+                                      height: 20, width: 20,
+                                      fit: BoxFit.contain,
+                                      semanticLabel: 'Google'),
                               label: Text(
                                   isThai ? 'เข้าสู่ระบบด้วย Google' : 'Continue with Google',
                                   style: TextStyle(
@@ -217,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
                     Center(
                       child: TextButton(
                         onPressed: () => Navigator.push(

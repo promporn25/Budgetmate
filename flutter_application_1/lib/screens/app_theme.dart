@@ -53,10 +53,23 @@ class AppColors {
   static Color get pinnedGoalIcon => const Color(0xFF3D568F);
 }
 
+/// Phone layout metrics in logical pixels; system text scaling stays intact.
+class AppLayout {
+  static double pageInset(BuildContext context) =>
+      (MediaQuery.sizeOf(context).width * 0.04).clamp(14.0, 20.0);
+
+  static double chartHeight(BuildContext context) =>
+      (MediaQuery.sizeOf(context).width * 0.52).clamp(180.0, 240.0);
+
+  static double categoryHeight(BuildContext context, {bool compact = false}) =>
+      (compact ? 52.0 : (MediaQuery.sizeOf(context).width * 0.16).clamp(58.0, 66.0)) +
+      (MediaQuery.textScalerOf(context).scale(12) - 12).clamp(0.0, 48.0);
+}
+
 class AppRadius {
   static const sm = 12.0;
   static const md = 16.0;
-  static const lg = 22.0;
+  static const lg = 16.0;
   static const pill = 999.0;
 }
 
@@ -84,12 +97,12 @@ const String appFontFamily = 'Mali';
 class AppTextStyles {
   static TextStyle get title => TextStyle(
       fontFamily: appFontFamily,
-      fontSize: 22,
+      fontSize: 18,
       fontWeight: FontWeight.w700,
       color: AppColors.textPrimary);
   static TextStyle get heading => TextStyle(
       fontFamily: appFontFamily,
-      fontSize: 16,
+      fontSize: 15,
       fontWeight: FontWeight.w600,
       color: AppColors.textPrimary);
   static TextStyle get label => TextStyle(
@@ -141,12 +154,13 @@ class AppTheme {
         onSurface: onSurface,
       ),
       appBarTheme: AppBarTheme(
+        toolbarHeight: 48,
         backgroundColor: bg,
         foregroundColor: ink,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         titleTextStyle: TextStyle(
-            fontFamily: appFontFamily, fontSize: 17, fontWeight: FontWeight.w600, color: ink),
+            fontFamily: appFontFamily, fontSize: 16, fontWeight: FontWeight.w600, color: ink),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: isDark ? const Color(0xFF1E2740) : Colors.white,
@@ -179,7 +193,7 @@ class AppHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(6, MediaQuery.of(context).padding.top + 4, 16, 16),
+      padding: EdgeInsets.fromLTRB(6, MediaQuery.of(context).padding.top + 2, 16, 8),
       decoration: BoxDecoration(
         color: AppColors.brightness == Brightness.dark ? AppColors.surface : AppColors.accent,
         borderRadius: const BorderRadius.only(
@@ -190,7 +204,9 @@ class AppHeader extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.ink, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 36),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.ink, size: 18),
             onPressed: onBack ?? () => Navigator.maybePop(context),
           ),
           Expanded(
@@ -200,7 +216,7 @@ class AppHeader extends StatelessWidget {
               style: TextStyle(
                   fontFamily: appFontFamily,
                   fontWeight: FontWeight.w700,
-                  fontSize: 17,
+                  fontSize: 16,
                   color: AppColors.ink),
               overflow: TextOverflow.ellipsis,
             ),
@@ -229,7 +245,7 @@ class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(16),
+    this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     this.color,
     this.onTap,
   });
@@ -278,16 +294,15 @@ class PrimaryButton extends StatelessWidget {
     required this.onPressed,
     this.loading = false,
     this.color,
-    this.height = 52,
+    this.height = 48,
   });
 
   @override
   Widget build(BuildContext context) {
     final bg = color ?? AppColors.ink;
     final fg = AppColors.inkOn;
-    return SizedBox(
-      width: double.infinity,
-      height: height,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: height, minWidth: double.infinity),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: bg,
@@ -303,10 +318,11 @@ class PrimaryButton extends StatelessWidget {
                 child: CircularProgressIndicator(strokeWidth: 2, color: fg),
               )
             : Text(label,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                     fontFamily: appFontFamily,
                     color: fg,
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600)),
       ),
     );
@@ -321,6 +337,8 @@ class AppTextField extends StatelessWidget {
   final bool obscureText;
   final VoidCallback? toggleObscure;
   final TextInputType? keyboardType;
+  final bool readOnly;
+  final VoidCallback? onTap;
   final int maxLines;
   final bool autofocus;
   final String? prefixText;
@@ -329,6 +347,7 @@ class AppTextField extends StatelessWidget {
   final TextAlign textAlign;
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
+  final Iterable<String>? autofillHints;
 
   const AppTextField({
     super.key,
@@ -338,6 +357,8 @@ class AppTextField extends StatelessWidget {
     this.obscureText = false,
     this.toggleObscure,
     this.keyboardType,
+    this.readOnly = false,
+    this.onTap,
     this.maxLines = 1,
     this.autofocus = false,
     this.prefixText,
@@ -346,25 +367,34 @@ class AppTextField extends StatelessWidget {
     this.textAlign = TextAlign.start,
     this.inputFormatters,
     this.onChanged,
+    this.autofillHints,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      autofillHints: autofillHints,
+      autocorrect: toggleObscure == null,
+      enableSuggestions: toggleObscure == null,
       keyboardType: keyboardType,
+      readOnly: readOnly,
+      onTap: onTap,
       obscureText: obscureText,
+      obscuringCharacter: '*',
       maxLines: obscureText ? 1 : maxLines,
       autofocus: autofocus,
       textAlign: textAlign,
       inputFormatters: inputFormatters,
       onChanged: onChanged,
-      style: style ?? TextStyle(fontFamily: appFontFamily, fontSize: 15, color: AppColors.textPrimary),
+      style: style ?? TextStyle(fontFamily: appFontFamily, fontSize: 14, color: AppColors.textPrimary),
       decoration: InputDecoration(
+        isDense: true,
+        constraints: const BoxConstraints(minHeight: 48),
         hintText: hint,
         hintStyle: AppTextStyles.hint,
         prefixText: prefixText,
-        prefixStyle: style ?? TextStyle(fontFamily: appFontFamily, fontSize: 15, color: AppColors.textPrimary),
+        prefixStyle: style ?? TextStyle(fontFamily: appFontFamily, fontSize: 14, color: AppColors.textPrimary),
         prefixIcon: icon != null ? Icon(icon, color: AppColors.textSecondary, size: 21) : null,
         suffixIcon: toggleObscure != null
             ? IconButton(
@@ -396,7 +426,7 @@ class AppTextField extends StatelessWidget {
         ),
         errorText: errorText,
         errorStyle: TextStyle(fontFamily: appFontFamily, color: AppColors.danger, fontSize: 12),
-        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       ),
     );
   }
@@ -416,7 +446,7 @@ class MessageBanner extends StatelessWidget {
     final icon = isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(AppRadius.sm + 2)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,13 +475,13 @@ class HeaderIconBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: 76,
-        height: 76,
+        width: 52,
+        height: 52,
         decoration: BoxDecoration(
           color: background ?? AppColors.accentBg,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 38, color: iconColor ?? AppColors.ink),
+        child: Icon(icon, size: 28, color: iconColor ?? AppColors.ink),
       ),
     );
   }
@@ -579,11 +609,11 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 48),
+      padding: const EdgeInsets.symmetric(vertical: 32),
       child: Column(
         children: [
-          Icon(icon, size: 40, color: AppColors.textMuted),
-          const SizedBox(height: 12),
+          Icon(icon, size: 36, color: AppColors.textMuted),
+          const SizedBox(height: 10),
           Text(text, style: AppTextStyles.caption),
         ],
       ),

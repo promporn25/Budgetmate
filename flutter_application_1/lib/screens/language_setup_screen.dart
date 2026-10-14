@@ -7,7 +7,7 @@ import 'login_screen.dart';
 import '../services/app_strings.dart';
 
 const List<String> _languages = ['ไทย', 'English'];
-const List<String> _currencies = ['THB', 'USD', 'EUR', 'JPY', 'GBP'];
+const List<String> _currencies = ['THB'];
 
 /// หน้า "My wallet" (3.4.2) - ตั้งค่าภาษาและสกุลเงินเริ่มต้นของแอป
 class LanguageSetupScreen extends StatefulWidget {
@@ -72,20 +72,20 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
       backgroundColor: AppColors.bg,
       body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const HeaderIconBadge(icon: Icons.tune_rounded),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 Text(_t('setup_title'),
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                 const SizedBox(height: 6),
                 Text(_t('setup_desc'),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                const SizedBox(height: 40),
+                const SizedBox(height: 28),
                 _dropdownRow(
                   icon: Icons.language_rounded,
                   label: _t('language_label'),
@@ -95,7 +95,7 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                     if (v != null) setState(() => _language = v);
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 _dropdownRow(
                   icon: Icons.payments_outlined,
                   label: _t('currency_label'),
@@ -104,7 +104,7 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                   onChanged: (v) => setState(() => _currency = v!),
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Text(_error!, style: TextStyle(color: AppColors.danger)),
                 ],
                 const SizedBox(height: 48),
@@ -132,7 +132,7 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
     required ValueChanged<String?> onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.md),

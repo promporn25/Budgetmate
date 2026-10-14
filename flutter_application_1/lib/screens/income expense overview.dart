@@ -1,3 +1,4 @@
+import 'transaction_details_sheet.dart';
 import '../widgets/data_action.dart';
 import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -65,24 +66,23 @@ class _IncomeExpenseOverviewState
     // PIE CHART
     // ============================================================
 
-    final byCategory = service.expenseByCategory();
-
-    final entries = byCategory.entries.toList();
-
-    final total = entries.fold<double>(
-      0,
-      (sum, e) => sum + e.value,
-    );
-
-    // ============================================================
-    // TRANSACTIONS
-    // ============================================================
-
-    final allTransactions = service.transactions;
-
-    final historyList = _getHistoryList(
-      allTransactions,
-    );
+    // Aggregate exactly the transactions shown by the active type/date filter.
+    final historyList = _getHistoryList(service.transactions);
+    final byCategory = <String, MapEntry<CategoryModel, double>>{};
+    for (final transaction in historyList) {
+      final key = '${transaction.type.name}:${transaction.category.id}';
+      final previous = byCategory[key]?.value ?? 0;
+      byCategory[key] = MapEntry(transaction.category, previous + transaction.amount);
+    }
+    final entries = byCategory.values.where((entry) => entry.value > 0).toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final total = entries.fold<double>(0, (sum, entry) => sum + entry.value);
+    final isThai = service.currentLanguage != 'English';
+    final chartTitle = switch (_historyFilter) {
+      HistoryFilter.all => isThai ? 'สัดส่วนรายรับและรายจ่าย · ทุกวัน' : 'Income and expenses · All dates',
+      HistoryFilter.income => isThai ? 'สัดส่วนรายรับ' : 'Income breakdown',
+      HistoryFilter.expense => isThai ? 'สัดส่วนรายจ่าย' : 'Expense breakdown',
+    };
 
     return Column(
       children: [
@@ -93,15 +93,21 @@ class _IncomeExpenseOverviewState
         if (entries.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              16,
-              16,
-              16,
+              12,
+              12,
+              12,
               0,
             ),
             child: AppCard(
-              padding: const EdgeInsets.all(14),
-              child: SizedBox(
-                height: 186,
+              padding: const EdgeInsets.all(8),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(chartTitle, style: AppTextStyles.label),
+                const SizedBox(height: 4),
+                Text('${isThai ? 'ยอดรวม' : 'Total'} ${service.formatMoney(total)}',
+                  key: const Key('overview-chart-total'), style: AppTextStyles.caption),
+                const SizedBox(height: 8),
+                SizedBox(
+                height: 128,
                 child: Row(
                   children: [
                     // ==================================================
@@ -113,7 +119,7 @@ class _IncomeExpenseOverviewState
                       child: PieChart(
                         PieChartData(
                           sectionsSpace: 2,
-                          centerSpaceRadius: 30,
+                          centerSpaceRadius: 22,
 
                           sections: List.generate(
                             entries.length,
@@ -121,7 +127,7 @@ class _IncomeExpenseOverviewState
                               final e = entries[i];
 
                               final pct = total == 0
-                                  ? 0
+                                  ? 0.0
                                   : (e.value / total) * 100;
 
                               return PieChartSectionData(
@@ -130,14 +136,13 @@ class _IncomeExpenseOverviewState
 
                                 value: e.value,
 
-                                title:
-                                    '${pct.toStringAsFixed(0)}%',
+                                title: pct < 3 ? '' : _percentage(pct),
 
-                                radius: 58,
+                                radius: 44,
 
                                 titleStyle:
                                     const TextStyle(
-                                  color: Colors.white,
+                                  color: Color(0xFF283350),
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -155,17 +160,20 @@ class _IncomeExpenseOverviewState
                     Expanded(
                       flex: 2,
                       child: ListView.builder(
+                        padding: EdgeInsets.zero,
                         itemCount: entries.length,
 
                         itemBuilder: (context, i) {
                           return Padding(
                             padding:
                                 const EdgeInsets.symmetric(
-                              vertical: 3,
+                              vertical: 4,
                             ),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
+                                  margin: const EdgeInsets.only(top: 5),
                                   width: 9,
                                   height: 9,
                                   decoration: BoxDecoration(
@@ -178,17 +186,25 @@ class _IncomeExpenseOverviewState
                                 const SizedBox(width: 6),
 
                                 Expanded(
-                                  child: Text(
-                                    service.categoryName(
-                                      entries[i].key,
-                                    ),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color:
-                                          AppColors.textPrimary,
-                                    ),
-                                    overflow:
-                                        TextOverflow.ellipsis,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(service.categoryName(entries[i].key),
+                                        style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                                      const SizedBox(height: 3),
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                          Text('${entries[i].key.type == CategoryType.income ? '+' : '-'}${service.formatMoney(entries[i].value)}',
+                                            style: AppTextStyles.caption),
+                                          const SizedBox(width: 6),
+                                          Text(_percentage(entries[i].value / total * 100),
+                                            style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
+                                        ]),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -200,60 +216,34 @@ class _IncomeExpenseOverviewState
                   ],
                 ),
               ),
+              ]),
             ),
           )
         else
           EmptyState(
             icon: Icons.pie_chart_outline_rounded,
-            text: service.t('no_expense_data'),
+            text: _historyFilter == HistoryFilter.all
+              ? (isThai ? 'ยังไม่มีรายการ' : 'No transactions yet')
+              : service.t(_historyFilter == HistoryFilter.income ? 'no_income_data' : 'no_expense_data'),
           ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
         // ========================================================
         // HISTORY HEADER + MENU
         // ========================================================
 
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // ----------------------------------------------------
-              // หัวข้อ "ประวัติ"
-              // ----------------------------------------------------
-
-              Expanded(
-                child: Row(
-                  children: [
-                    Text(
-                      service.t('history'),
-                      style: AppTextStyles.heading,
-                    ),
-
-                    const SizedBox(width: 6),
-
-                    Icon(
-                      Icons.favorite_rounded,
-                      size: 15,
-                      color: AppColors.accentPink,
-                    ),
-                  ],
-                ),
-              ),
-
-              // ----------------------------------------------------
-              // เมนูชิดขวา
-              // ----------------------------------------------------
-
-              _historyMenu(service),
-            ],
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(service.t('history'), style: AppTextStyles.heading),
+            const SizedBox(height: 8),
+            Align(alignment: Alignment.centerRight,
+              child: FittedBox(fit: BoxFit.scaleDown, child: _historyMenu(service))),
+          ]),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
         // ========================================================
         // CONTENT
@@ -276,6 +266,8 @@ class _IncomeExpenseOverviewState
   // ==============================================================
   // HISTORY MENU
   // ==============================================================
+
+  String _percentage(double value) => value < 0.1 ? '<0.1%' : '${value.toStringAsFixed(1)}%';
 
   Widget _historyMenu(DataService service) {
     return Container(
@@ -301,7 +293,7 @@ class _IncomeExpenseOverviewState
         mainAxisSize: MainAxisSize.min,
         children: [
           _historyMenuItem(
-            label: 'ทั้งหมด',
+            label: service.t('all'),
             selected: _historyFilter == HistoryFilter.all,
             onTap: () {
               setState(() {
@@ -311,7 +303,7 @@ class _IncomeExpenseOverviewState
           ),
 
           _historyMenuItem(
-            label: 'รายรับ',
+            label: service.t('income'),
             selected:
                 _historyFilter == HistoryFilter.income,
             onTap: () {
@@ -327,7 +319,7 @@ class _IncomeExpenseOverviewState
           ),
 
           _historyMenuItem(
-            label: 'รายจ่าย',
+            label: service.t('expense'),
             selected:
                 _historyFilter == HistoryFilter.expense,
             onTap: () {
@@ -366,7 +358,7 @@ class _IncomeExpenseOverviewState
         ),
 
         padding: const EdgeInsets.symmetric(
-          horizontal: 12,
+          horizontal: 10,
           vertical: 7,
         ),
 
@@ -412,7 +404,7 @@ class _IncomeExpenseOverviewState
         return transactions
             .where(
               (t) =>
-                  t.type == CategoryType.income,
+                  t.type == CategoryType.income && _isSameDay(t.date, _selectedDate),
             )
             .toList();
 
@@ -420,7 +412,7 @@ class _IncomeExpenseOverviewState
         return transactions
             .where(
               (t) =>
-                  t.type == CategoryType.expense,
+                  t.type == CategoryType.expense && _isSameDay(t.date, _selectedDate),
             )
             .toList();
     }
@@ -447,7 +439,7 @@ class _IncomeExpenseOverviewState
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(
-          horizontal: 16,
+          horizontal: 12,
         ),
 
         children: _buildGroupedHistory(
@@ -468,12 +460,6 @@ class _IncomeExpenseOverviewState
     List<TransactionModel> list,
     DataService service,
   ) {
-    final selectedTransactions = list.where(
-      (t) => _isSameDay(
-        t.date,
-        _selectedDate,
-      ),
-    ).toList();
 
     return RefreshIndicator(
       color: AppColors.accentDeep,
@@ -482,7 +468,7 @@ class _IncomeExpenseOverviewState
       child: ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(
-        horizontal: 16,
+        horizontal: 12,
       ),
 
       children: [
@@ -493,15 +479,15 @@ class _IncomeExpenseOverviewState
 
         _dateSelectorPill(service),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
-        if (selectedTransactions.isEmpty)
+        if (list.isEmpty)
           EmptyState(
             icon: Icons.receipt_long_outlined,
             text: 'ไม่มีรายการในวันนี้',
           )
         else
-          ...selectedTransactions.map(
+          ...list.map(
             (t) => Padding(
               padding: const EdgeInsets.only(
                 bottom: 8,
@@ -534,7 +520,7 @@ class _IncomeExpenseOverviewState
 
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: 14,
+          horizontal: 10,
           vertical: 9,
         ),
 
@@ -730,10 +716,12 @@ class _IncomeExpenseOverviewState
         ? AppColors.incomeBg
         : AppColors.expenseBg;
 
-    return Container(
+    return GestureDetector(
+      onTap: () => showTransactionDetails(context, t),
+      child: Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 12,
+        horizontal: 8,
+        vertical: 4,
       ),
 
       decoration: BoxDecoration(
@@ -759,14 +747,14 @@ class _IncomeExpenseOverviewState
           // ======================================================
 
           CircleAvatar(
-            radius: 18,
+            radius: 15,
 
             backgroundColor: accentBg,
 
             child: CategoryIcon(
               category: t.category,
               color: accent,
-              size: 17,
+              size: 15,
             ),
           ),
 
@@ -789,7 +777,7 @@ class _IncomeExpenseOverviewState
 
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 13,
+                    fontSize: 12,
                     color: AppColors.textPrimary,
                   ),
 
@@ -799,6 +787,10 @@ class _IncomeExpenseOverviewState
                       TextOverflow.ellipsis,
                 ),
 
+                if (t.note?.isNotEmpty == true) ...[
+                  const SizedBox(height: 4),
+                  Text(t.note!, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                ],
                 const SizedBox(height: 2),
 
                 Text(
@@ -826,13 +818,21 @@ class _IncomeExpenseOverviewState
 
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 12.5,
+              fontSize: 12,
               color: accent,
             ),
           ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
+            tooltip: service.currentLanguage == 'English' ? 'Manage transaction' : 'จัดการรายการ',
+            onPressed: () => showTransactionDetails(context, t),
+            icon: Icon(Icons.more_horiz_rounded, color: AppColors.ink, size: 18),
+          ),
         ],
       ),
-    );
+    ));
   }
 
   // ==============================================================

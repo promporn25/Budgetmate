@@ -1,0 +1,1569 @@
+{
+  "created": "2026-10-13",
+  "code_files": [
+    {
+      "path": "config/password_reset_email_th.html",
+      "lines": 7,
+      "sha256": "ac70be86f3b13269fc779b24ee3f1e40d03d3644ee098c74e8edff77dc8dcab1",
+      "description": "โค้ด HTML/CSS ของหน้าเว็บตาม path: โครง DOM รูปแบบข้อความ ปุ่ม และส่วนเชื่อมสคริปต์; public/reset_password.html ใช้ร่วมกับ reset_password.js ส่วน web/index.html เป็นจุดโหลด Flutter web"
+    },
+    {
+      "path": "docs/render-flowchart.swift",
+      "lines": 96,
+      "sha256": "ed4395631a379c95e0c7e6e97982ff7924113472613d97b6efe2e5a0dabf1860",
+      "description": "เครื่องมือสร้างภาพ flowchart จากการวาดด้วย Swift ในเอกสาร ไม่ได้อยู่ในเส้นทาง runtime ของแอป BudgetMate"
+    },
+    {
+      "path": "firestore.rules",
+      "lines": 46,
+      "sha256": "dc894ea493f11768a8dafcf293021d1f02284d2098885176defb04243f0596c6",
+      "description": "กฎ Firebase Security Rules ตรวจสิทธิ์ตาม uid เจ้าของและเงื่อนไขข้อมูล; อ่านบท 11 ประกอบ ไม่ยืนยันว่าไฟล์นี้ถูก deploy แล้ว"
+    },
+    {
+      "path": "flutter_application_1/android/app/build.gradle.kts",
+      "lines": 47,
+      "sha256": "e64611dd57a82d636d09db34bcad2508e6d52e3e5760087ffe147bb7bfc67964",
+      "description": "สคริปต์ Gradle Kotlin DSL ตั้งค่า Android build และ plugins; app/build.gradle.kts ระบุ SDK, applicationId, Java 17 และ release signing แบบ debug ใน snapshot นี้"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/kotlin/com/example/flutter_application_1/MainActivity.kt",
+      "lines": 5,
+      "sha256": "ee5ca248be85304f63172751a1198155ae6610c43484aeb84d9aee097c0aa129",
+      "description": "Activity หลัก Android สืบทอด FlutterActivity เป็น host สำหรับ Flutter engine ไม่ได้คำนวณรายรับรายจ่าย"
+    },
+    {
+      "path": "flutter_application_1/android/build.gradle.kts",
+      "lines": 24,
+      "sha256": "6a26dba2cb8dfba1e74f540b0d17a89d96c1301d3c3bfda14348bed257fddcba",
+      "description": "สคริปต์ Gradle Kotlin DSL ตั้งค่า Android build และ plugins; app/build.gradle.kts ระบุ SDK, applicationId, Java 17 และ release signing แบบ debug ใน snapshot นี้"
+    },
+    {
+      "path": "flutter_application_1/android/settings.gradle.kts",
+      "lines": 29,
+      "sha256": "7b3642632af3dbe9955ebd1712a0d1ff264110037d4fec78ffb4bcb8c01dd8bd",
+      "description": "สคริปต์ Gradle Kotlin DSL ตั้งค่า Android build และ plugins; app/build.gradle.kts ระบุ SDK, applicationId, Java 17 และ release signing แบบ debug ใน snapshot นี้"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/ReceiptTextRecognizer.swift",
+      "lines": 43,
+      "sha256": "ff6079685090e5fcd24a2dba842c9c218023b134c3ef4a339fbd95dfedb58c37",
+      "description": "ตัวอ่าน Vision บนเครื่อง ตรวจภาษาไทย แล้วรวมกล่องข้อความตามแถวและเรียงซ้ายไปขวา คืน nil เมื่อระบบไม่รองรับเพื่อให้ fallback"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Runner-Bridging-Header.h",
+      "lines": 1,
+      "sha256": "1a8d11d01d1cc92c650c9c9ed35299240052d4683a15a719a2315ef44185e074",
+      "description": "Header เชื่อม Objective-C กับ Swift ของ iOS runner โดย import GeneratedPluginRegistrant เพื่อให้ Swift เรียกตัวลงทะเบียน Flutter plugins ได้"
+    },
+    {
+      "path": "flutter_application_1/ios/RunnerTests/RunnerTests.swift",
+      "lines": 12,
+      "sha256": "5e8f4908dacea6f29b2a790e4d38bf5fded69096063f9a27a2f21584d62b30c0",
+      "description": "ชุดทดสอบ: โครงทดสอบฝั่ง native ที่มากับโปรเจกต์ รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/lib/firebase_options.dart",
+      "lines": 65,
+      "sha256": "a7c8bdf23c120bf4df5868d654fa8690d6cd37731852b098a2ba72453b0e9d03",
+      "description": "ค่าตั้ง Firebase ที่ FlutterFire สร้าง เลือก Android/iOS/macOS ตาม platform ส่วน web/windows/linux โยน UnsupportedError จึงมีโฟลเดอร์ platform ไม่ได้แปลว่ารันได้ครบทุกระบบ"
+    },
+    {
+      "path": "flutter_application_1/lib/main.dart",
+      "lines": 79,
+      "sha256": "f060bebac4bbf6ba7cdad023f2e1c42f236f3cdb11e54d1538d5ab7c8050f733",
+      "description": "จุดเริ่มแอป ตั้ง Firebase และ locale แล้วห่อ MaterialApp ด้วย Provider/Consumer ของ DataService; AppScrollBehavior เพิ่มการลากด้วยเมาส์และ trackpad"
+    },
+    {
+      "path": "flutter_application_1/lib/models/category_model.dart",
+      "lines": 229,
+      "sha256": "92f876e506c1b4e3a6a520a93f5aed8d9678c08d9dc8c0efe52ce20b20c6381a",
+      "description": "กำหนด CategoryType, หมวดมาตรฐาน c01–c55 และหมวดลูก; CategoryIcon เลือกภาพ artwork หรือภาพ asset ก่อน fallback เป็นไอคอน คอมเมนต์เรื่อง seed SQLite เป็นข้อความเก่า"
+    },
+    {
+      "path": "flutter_application_1/lib/models/goal_model.dart",
+      "lines": 104,
+      "sha256": "a6ba0c2c5de0408b4443ab37cb6e54b8674a5188fc9edda7bfc7e1d54d27482d",
+      "description": "ข้อมูลเป้าหมายพร้อมสถานะ ปักหมุด โน้ต และสกุลเงิน; progress/isNearTarget ใช้แสดงความคืบหน้า copyWith และ toMap/fromMap ใช้แก้และจัดเก็บ"
+    },
+    {
+      "path": "flutter_application_1/lib/models/persisted_icons.dart",
+      "lines": 64,
+      "sha256": "e1cf1e951e80747c2d62ba0f0364134bb4775122e26f907c068c674b7b0cd379",
+      "description": "รายการ IconData แบบ const ที่อนุญาตให้แปลง codePoint กลับเป็นไอคอนโดยมี fallback ช่วยรักษาไอคอนที่เคยบันทึกและรองรับ icon tree shaking"
+    },
+    {
+      "path": "flutter_application_1/lib/models/transaction_model.dart",
+      "lines": 77,
+      "sha256": "001485cab0ba610ae4bda3846b54930d0324a56cba778665d1c0106a4a1a3d1a",
+      "description": "ข้อมูลรายการหนึ่งรายการ รวมหมวด วัน จำนวน หมายเหตุ สกุลเงิน และ marker รูปแนบ; copyWith รักษา id เดิม toMap ใช้ category_id แทนการเก็บ object หมวดทั้งก้อน"
+    },
+    {
+      "path": "flutter_application_1/lib/models/user_model.dart",
+      "lines": 61,
+      "sha256": "ee3adda68b769e9174aa7ffd39a4ec45a24c5b49611b967448ed421421f91985",
+      "description": "ข้อมูลโปรไฟล์ ไม่มีรหัสผ่าน แยก currency ที่เลือกกับ ledgerCurrency สำหรับรายการเดิม แปลง avatar_base64 และวันที่ระหว่าง Map กับ object"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/Forgot password screen.dart",
+      "lines": 232,
+      "sha256": "4481c65924ceb54e3deb4cf43139ff41f162145bc2a9a7ffb7e9f038248205c4",
+      "description": "รับอีเมลแล้วเรียก resetPassword แสดงผลส่งลิงก์หรือ error; ผู้ใช้กำหนดรหัสใหม่ที่ลิงก์เว็บ ไม่ได้เปลี่ยนรหัสในฟอร์มนี้"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/Splash screen.dart",
+      "lines": 68,
+      "sha256": "936e44b96c01b85f7e0994b88f52825d1399bde08f652510f1fb818f8df80ce9",
+      "description": "หน้า splash อีกชุดในโปรเจกต์ รอแล้วไป Login; main ปัจจุบันเลือก LoadingScreen จึงไม่ควรอธิบายว่า SplashScreen เป็นจุดเริ่มจริง"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/account_setting_screen.dart",
+      "lines": 713,
+      "sha256": "e2006a2e4c809128ee6359bf4669969ef09d1926c01c36a84afad00c472348b5",
+      "description": "จัดการชื่อ ภาษา รูปโปรไฟล์ ธีม การแจ้งสำเร็จ และ logout พร้อมเปิดหน้ารหัสผ่าน _AvatarPicker อ่านรูป Base64 หรือแคช และเรียก pickAvatar/removeAvatar"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/add_goal_saving_screen.dart",
+      "lines": 707,
+      "sha256": "bb43a9296966299ba9b4d0c32bafa3d8ed1bdbad45bd078aa02ef8c94d91d41f",
+      "description": "ใช้ฟอร์มเดียวสร้างหรือแก้เป้าหมาย รับชื่อ จำนวน วันเป้าหมาย โน้ต และ artwork; ถ้าส่ง goal มาเรียก editGoal ไม่เช่นนั้น addGoal มี keypad ร่วม"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/add_income_expense_screen.dart",
+      "lines": 1261,
+      "sha256": "e5f70d9cb39232ffe67d89e9fe50338907adc5e661c2952a0d9c909f10310f21",
+      "description": "ฟอร์มเลือกประเภท หมวด จำนวน และโน้ต มี keypad และรายการรอบันทึกหลายรายการ รองรับแก้รายการชั่วคราว ค้นหมวด สร้างหมวด และเปิดสแกนก่อนบันทึกจริง"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/app_theme.dart",
+      "lines": 667,
+      "sha256": "680f9e36fb3def80d09802535bd239e67efc68eab138e2827a7cab7b0bbde301",
+      "description": "รวม AppColors, AppLayout, AppRadius, AppTextStyles และธีมมืด รวม widget กลาง เช่น AppHeader, AppCard, PrimaryButton, AppTextField, MessageBanner, EmptyState และ mascot ที่วาดด้วย CustomPainter"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/change_password_screen.dart",
+      "lines": 164,
+      "sha256": "84027a2909088376122d5c8f7603dc17507fa6e42e1834e07d40701ad35ff78b",
+      "description": "รับรหัสเดิม รหัสใหม่ และยืนยัน ตรวจ policy/confirmation แล้วเรียก changePassword แสดงผลลัพธ์และสถานะกำลังบันทึก"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/currency_screen.dart",
+      "lines": 42,
+      "sha256": "1a1f0dcbe6a2ed8f30b98a679d85b5f7ec3d916e174585ade5b288d53d4cff98",
+      "description": "dropdown ของ supportedCurrencies บันทึกด้วย setCurrency และกลับหน้าก่อนหน้า; เป็นการเลือกกลุ่มรายการตามสกุลเงิน ไม่มี conversion"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/edit_transaction_screen.dart",
+      "lines": 326,
+      "sha256": "99b4f321dc4be85d8e46bcafc9375f6c7389eac654370d29a94500770e987fde",
+      "description": "sheet/หน้าแก้รายการ เติมค่าจาก object เดิม ใช้ addTransaction เมื่อทำซ้ำหรือ editTransaction เมื่อแก้ มี date picker และ keypad; บันทึกสำเร็จคืน true"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/goal_saving_screen.dart",
+      "lines": 795,
+      "sha256": "9a53694ed042517c64ae9095a216d4a01d11bb5bc708106be2f553cffc86329d",
+      "description": "แสดงการ์ดเป้าหมายและเงินคงเหลือ พร้อมปักหมุด แก้ ลบ และ dialog ฝากเงิน _showDepositDialog จำกัดตัวเลือกตามส่วนที่ขาดและ balance แล้วเรียก transferToGoal"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/history_screen.dart",
+      "lines": 157,
+      "sha256": "057d4d05dfed3ef0f5763e535b1bd70fbd7e49a39ff404c252f7dd0d5ec1bc66",
+      "description": "หน้าประวัติรายการ ใช้ DataService.transactions และตัวกรองเพื่อสร้างรายการ เปิดรายละเอียดผ่าน showTransactionDetails และรองรับ refresh"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/home_screen.dart",
+      "lines": 742,
+      "sha256": "572774f138241a01839b64a4e96c00970ce17188809905d7b32e4677f998db37",
+      "description": "หน้าภาพรวม สร้างชุดข้อมูลกราฟรายวัน/เดือน/ปีจาก DataService แสดงเป้าหมายที่ปักหมุดและทางลัด มีส่วน header และการรีเฟรชข้อมูล"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/income expense overview.dart",
+      "lines": 860,
+      "sha256": "6dbeb4472057f3433a03155f692935ec249dbde592b89728cc335ed55ddef43f",
+      "description": "แสดงกราฟวงกลมและรายการจากตัวกรองเดียวกัน มีประเภทและปฏิทิน รวมยอดด้วย key ประเภท+หมวด และเปิดรายละเอียดรายการเมื่อเลือก"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/income_expense_screen.dart",
+      "lines": 45,
+      "sha256": "c74855a81cffdbea7322b8d0cd30194a8b81485227b98793deb46c7494f331e1",
+      "description": "โครงหน้า Scaffold ครอบ IncomeExpenseOverview ส่ง initialFilter และจัดปุ่มกลับกับ BottomNav ตัวกราฟและประวัติอยู่ไฟล์ overview"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/language_setup_screen.dart",
+      "lines": 168,
+      "sha256": "499589a1a3857f59f85b307e80d6ef01d7da016b76262e013cce5c1ce7a18efb",
+      "description": "อ่านค่าภาษา/สกุลเงินเดิม ให้ preview ก่อนบันทึก completeSetup แล้วไป Login หรือ Home ตาม session; ไม่เขียนค่าทุกครั้งที่เปลี่ยนตัวเลือก"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/loading_screen.dart",
+      "lines": 169,
+      "sha256": "80e858cbb36d68b64e22f1b1466bb5251e2fbf6f512d5b42692b032a5daaa754",
+      "description": "หน้าเริ่มต้นจริงจาก main เรียก DataService.init รอเวลาขั้นต่ำแล้วเลือก Home/Login; _LoadingDots เป็น animation ประกอบหน้า"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/login_screen.dart",
+      "lines": 451,
+      "sha256": "7f364d90708c85985c0a407c2ec129b6170d7a71ec7c59ef9f304ba62e16c232",
+      "description": "ฟอร์มอีเมล/รหัสผ่านและ Google Sign-In จัดการ loading/error เมื่อสำเร็จล้าง navigation stack; Google บัญชีใหม่ไปตั้งค่า ส่วนบัญชีเดิมไป Home มี AuthTabToggle ใช้ร่วมกับหน้าสมัคร"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/receipt_scan_screen.dart",
+      "lines": 760,
+      "sha256": "bba8f2ffc2ea518fe80c98c26a80df1252f6942516dd5cf42d8e7190de989d51",
+      "description": "ควบคุม pick→scan→review→save ตรวจชนิด/ขนาดภาพ รักษาบัญชีและสกุลเงินขณะสแกน จัดการ error หลายชนิดและลบไฟล์ orphan เมื่อบันทึกไม่สำเร็จ"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/register_screen.dart",
+      "lines": 269,
+      "sha256": "5064e9b66c42a1e1c96518090e4f095a490d4c72d8d5f0dbfa733e23cbbabd67",
+      "description": "รับชื่อ อีเมล รหัสและการยืนยัน ตรวจช่องจำเป็น ความตรงกัน และ policy ก่อน register เมื่อสำเร็จนำไปขั้นตั้งค่า; dispose controller เพื่อคืนทรัพยากร"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/statistic_screen.dart",
+      "lines": 492,
+      "sha256": "d9cee15bafdb8243b82e581338c95488898b0fb0a1877293184c467d3fc4b2fb",
+      "description": "สร้างชุดข้อมูลกราฟตาม ChartPeriod แสดงสัดส่วนรายรับรายจ่าย หมวดใช้จ่ายสูง และรายการเป้าหมาย/เป้าที่เด่นจาก progress; บางการ์ดใช้ยอดรวมทั้งหมดในสกุลเงิน"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/transaction_details_sheet.dart",
+      "lines": 258,
+      "sha256": "661a5190647b6406eb9f38a84acf902c5a4b21517983c309fda497606034b89c",
+      "description": "showTransactionDetails เปิดรายละเอียดและรับ action edit/duplicate/delete เรียก editor สำหรับสองอย่างแรก และ dialog ยืนยันก่อนลบ แสดงข้อมูลบัญชี หมวด วัน และยอด"
+    },
+    {
+      "path": "flutter_application_1/lib/screens/wallet_screen.dart",
+      "lines": 358,
+      "sha256": "076c6e61c7944c749941f403803041343931d06779649fe57ed0282176389dbc",
+      "description": "แสดงยอดคงเหลือ รายรับ รายจ่าย และทางไปประวัติ/หน้าสรุป/เป้าหมาย ปุ่มย้อนกลับจัดเส้นทางไป Home เพื่อไม่กลับไป Login โดยไม่ตั้งใจ"
+    },
+    {
+      "path": "flutter_application_1/lib/services/app_strings.dart",
+      "lines": 472,
+      "sha256": "8712c1b19d83ea4c722bb4d7102664d2d16917a05d38b5dc0ba4af9f2d452b09",
+      "description": "พจนานุกรมข้อความภาษาไทยและอังกฤษ ใช้ key กลางร่วมกับ DataService.t รวมชื่อหมวด ข้อความฟอร์ม ปุ่ม และข้อผิดพลาด; การเพิ่มข้อความควรใส่ทั้งสองภาษา"
+    },
+    {
+      "path": "flutter_application_1/lib/services/data_service.dart",
+      "lines": 1008,
+      "sha256": "5ee0575e1c5d2f7cd8654a88ae204139ed0dd3c7442d2efeb9a0ce88db681574",
+      "description": "ศูนย์กลางบัญชี สถานะในหน่วยความจำ การบันทึก/แก้/ลบ กฎยอดออม การรวมยอด และค่าตั้ง; เขียนฐานข้อมูลก่อนอัปเดต list แล้ว notifyListeners เพื่อให้หน้าจอสะท้อนผลสำเร็จ"
+    },
+    {
+      "path": "flutter_application_1/lib/services/db_helper.dart",
+      "lines": 229,
+      "sha256": "297c0354d7f07f435359113ca1bd842dea548e26e877a41c0913600d159f9e0c",
+      "description": "ตัวเชื่อม Firestore แบบ singleton รองรับ CRUD, batch, query, count และ transaction สำหรับยอดออม พร้อมแปลงข้อผิดพลาดเป็นข้อความ; ไม่มีการเปิด SQLite ในไฟล์นี้"
+    },
+    {
+      "path": "flutter_application_1/lib/services/local_receipt_store.dart",
+      "lines": 40,
+      "sha256": "dd06b7ed9945f8f0fba2f2a90064a656dab6b2ca1ed95d1caf8617b847c7d532",
+      "description": "บันทึก bytes ของภาพในเครื่องภายใต้โฟลเดอร์ hash เจ้าของและชื่อ UUID คืน local-receipt marker; delete ตรวจรูปแบบ marker ก่อนลบเพื่อกัน path ที่ไม่ตรงรูปแบบ"
+    },
+    {
+      "path": "flutter_application_1/lib/services/password_policy.dart",
+      "lines": 35,
+      "sha256": "b8062399736983df5c0401d2c461fc23f982eb185cbc6f2b76255e1beb413744",
+      "description": "ไฟล์ Dart ที่สร้างจาก JSON กลาง คืน translation key เมื่อรหัสไม่ผ่าน และ null เมื่อผ่าน ใช้สมัครสมาชิก/เปลี่ยนรหัส; ควรแก้ต้นฉบับ config ไม่แก้ไฟล์ generated เพียงตัวเดียว"
+    },
+    {
+      "path": "flutter_application_1/lib/services/receipt_parser.dart",
+      "lines": 262,
+      "sha256": "5494c4be798d1760aa41e933b7b74fe7d2eeb41cae3706a7ab867812f661c4f4",
+      "description": "ReceiptDraft แยกยอด วัน และชื่อผู้รับจากข้อความ OCR ด้วย regex และหลักฐานหลายแบบ รองรับไทย/อังกฤษและปฏิเสธยอดกำกวม ไม่บันทึกฐานข้อมูลเอง"
+    },
+    {
+      "path": "flutter_application_1/lib/services/receipt_service.dart",
+      "lines": 69,
+      "sha256": "e67b5494e0320153873cd09a01c0ea73d675c15208de0c6543c757dfca571623",
+      "description": "เรียก OCR native ในเครื่องและแปลงเป็น ReceiptDraft ใช้ Apple Vision ก่อนบน iOS แล้ว fallback Tesseract ป้องกัน scan ซ้อนและมี timeout; constructor รับตัวอ่านทดแทนสำหรับ test"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/additional_category_artwork.dart",
+      "lines": 415,
+      "sha256": "da26bca63726a84671c09adee25ca07edfc8f690bb4500bcd0fcce9e2c4aaaa6",
+      "description": "ชุดข้อมูลชื่อไทย/อังกฤษ/กลุ่มของภาพหมวดเพิ่มเติม เป็น catalog ไม่ใช่ตรรกะการคำนวณเงิน"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/amount_keypad.dart",
+      "lines": 105,
+      "sha256": "5470dc091c859b1b3b4aee47be8809ac9acc4c23e1053d88bb7a5a4be5b86f8b",
+      "description": "แป้นตัวเลขร่วมและ showAmountKeypad แบบ bottom sheet แก้ text ตาม cursor จำกัดทศนิยมสองตำแหน่ง ใช้ controller เดียวกับช่องแสดงยอด"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/bottom_nav.dart",
+      "lines": 158,
+      "sha256": "729abd95f147bcb9002cf94c17987374a961990ee10e0cfe64e078884f09cbf5",
+      "description": "แถบนำทาง Home/Wallet/Add/Statistic/Menu เลือกหน้าตาม index และ pushReplacement ใช้ layout ของปุ่มและภาพร่วมกับระบบ artwork"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/category_artwork_catalog.dart",
+      "lines": 51,
+      "sha256": "82d1a6204fec05be43a0364f3a7f55d02882e9b9630af9eb0baedc3b94ea830e",
+      "description": "รวม metadata ภาพเพิ่มเติมและสร้างตัวเลือกหมวด/กลุ่มค้นหา ใช้ artwork ID คงที่เพื่อให้ภาพที่บันทึกไว้ไม่เปลี่ยนเมื่อเปิดใหม่"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/category_editor_sheet.dart",
+      "lines": 309,
+      "sha256": "3738a904f2ae6d19d428f079e5d639eec414a8052098b98dd4cde6698c8b5596",
+      "description": "สร้างหมวดพร้อมชื่อ สี หมวดย่อย และภาพ เลือก artwork จาก catalog/หมวดที่มีอยู่ เมื่อ service.addCategory สำเร็จคืน CategoryModel ให้หน้าที่เรียกเลือกใช้"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/data_action.dart",
+      "lines": 16,
+      "sha256": "b740d78a72ee524b446ed18c93910a8edc79e6d60fa02b3874cffae68a907bb0",
+      "description": "runDataAction จับ exception ของงาน async แล้วแสดง SnackBar เมื่อ context ยัง mounted; refreshAppData ใช้ wrapper นี้เรียก refreshData"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/password_requirements.dart",
+      "lines": 84,
+      "sha256": "2b88ff1da530970ba595fc4b1d2d03f07d4c56e29b12b26cff783c7b35d68944",
+      "description": "ฟังค่าจาก controller ของรหัสและยืนยัน แสดงเงื่อนไขที่ผ่าน/ไม่ผ่านตาม policy และข้อความภาษาปัจจุบัน ช่วยผู้ใช้แก้ก่อนส่งฟอร์ม"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/pastel_artwork.dart",
+      "lines": 146,
+      "sha256": "18187b6a4f314f45beac9b0a4afefba05f6b5b7b3d470e2ff7c4d3b37cdfb8a2",
+      "description": "PastelArtwork เลือกภาพจาก atlas ตามหมายเลข และ GoalArtwork เชื่อมไอคอนเป้าหมายกับภาพ วาด/ครอปตามตำแหน่งให้ภาพเดียวกันใช้ได้หลายหน้า"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/period_selector.dart",
+      "lines": 758,
+      "sha256": "2a789d8a06bef3ec47ae84c5681e52269cb2294e5b364adf1fe31e61d5fc02be",
+      "description": "ChartPeriod, PeriodFilterBar และ dialog เลือกวัน/เดือน/ปี ใช้ callback ส่งค่าไปให้หน้าที่คำนวณกราฟ ไม่อ่านหรือเขียนรายการฐานข้อมูลเอง"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/quick_actions.dart",
+      "lines": 68,
+      "sha256": "232926226fe6445383fb97382b7347ba3f5fdd91ce9cf110307d6674aa91fcb6",
+      "description": "วิดเจ็ตทางลัดไปฟังก์ชันต่าง ๆ ผ่าน Navigator; เป็นองค์ประกอบ UI ที่ต้องถูกวางในหน้าจอจึงใช้งานได้ การมีไฟล์ไม่ยืนยันว่าปรากฏทุกหน้า"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/receipt_category_picker.dart",
+      "lines": 174,
+      "sha256": "4f6aa9656ed18da6c9abeb431919a79a3f4ea4344f67aad48f8ddddfd20b9504",
+      "description": "sheet สำหรับค้นและเลือกหมวดรายจ่ายที่หน้าสแกนส่งมา คืนหมวดที่เลือกผ่าน Navigator.pop ไม่บันทึก transaction เอง"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/receipt_scan_error_dialog.dart",
+      "lines": 166,
+      "sha256": "c17af13dee7d0ff5fbb1b1d4ef1561170f15c7b5982e6a461799edd9e5bc6b4e",
+      "description": "dialog แสดงความล้มเหลวของ OCR แยกหมดเวลา/บริการไม่พร้อม/อ่านไม่ได้ และให้ปิดกลับไปลองรูปใหม่ รองรับข้อความไทย/อังกฤษ"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/responsive_scale.dart",
+      "lines": 19,
+      "sha256": "30542402711fa5e06b54ed73ec30d564f5dbd346530941c828e13a397042adba",
+      "description": "ห่อ SafeArea แนวนอนโดยไม่ transform scale ทั้งแอป แต่ละหน้ารับผิดชอบความสูง ส่วนหัว และคีย์บอร์ดเอง"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/success_notice.dart",
+      "lines": 111,
+      "sha256": "85cf6a642a7dcbd09a90209185123504fd1a337d8ed84007ecef4b8099600111",
+      "description": "banner สำเร็จบน root overlay มีตัวเลือกเปิดปิด แทน notice เดิมและ timer ปิด; Semantics liveRegion ช่วยการอ่านผลด้วย accessibility"
+    },
+    {
+      "path": "flutter_application_1/lib/widgets/transaction_sheet_style.dart",
+      "lines": 98,
+      "sha256": "31a756dfa0eef46cb87ada3368e26192ad2049116a6d2254897016047c360d4c",
+      "description": "รวมสีและกรอบ sheet ของรายละเอียด/แก้ไข รวมส่วนหัว ปุ่มปิด และเนื้อหา เพื่อให้หน้ารายการมีหน้าตาสอดคล้องกัน"
+    },
+    {
+      "path": "flutter_application_1/linux/flutter/generated_plugin_registrant.cc",
+      "lines": 15,
+      "sha256": "cf105e8ce1d7b7a3103b1f0cfa9b4d4a4abf69c6c4aad0a549f2774e32f7dcb9",
+      "description": "ไฟล์ที่เครื่องมือ Flutter สร้างเพื่อ register plugin ของแพลตฟอร์ม ไม่ใช่กฎธุรกิจ ควรให้ระบบสร้างใหม่เมื่อ dependencies เปลี่ยน"
+    },
+    {
+      "path": "flutter_application_1/linux/flutter/generated_plugin_registrant.h",
+      "lines": 15,
+      "sha256": "00f93bb5b1faefdede8f6065df327522900fb0b8efee86bacf424fd947ed14bb",
+      "description": "ไฟล์ที่เครื่องมือ Flutter สร้างเพื่อ register plugin ของแพลตฟอร์ม ไม่ใช่กฎธุรกิจ ควรให้ระบบสร้างใหม่เมื่อ dependencies เปลี่ยน"
+    },
+    {
+      "path": "flutter_application_1/linux/flutter/generated_plugins.cmake",
+      "lines": 25,
+      "sha256": "65075042e24dd08fe282914d279bc6d52484bb6f25778942258f9e48f8d29289",
+      "description": "ไฟล์ที่เครื่องมือ Flutter สร้างเพื่อ register plugin ของแพลตฟอร์ม ไม่ใช่กฎธุรกิจ ควรให้ระบบสร้างใหม่เมื่อ dependencies เปลี่ยน"
+    },
+    {
+      "path": "flutter_application_1/linux/runner/main.cc",
+      "lines": 6,
+      "sha256": "ea23f7cdf74091d63bba29ef60486370b766157b848f0cfe62bd8b1c1695a0c1",
+      "description": "โค้ด host ฝั่ง Linux: เชื่อม lifecycle หน้าต่าง GTK กับ Flutter engine และ plugins ส่วนกฎข้อมูลอยู่ Dart; Firebase options ปัจจุบันยังไม่รองรับ Linux"
+    },
+    {
+      "path": "flutter_application_1/linux/runner/my_application.cc",
+      "lines": 148,
+      "sha256": "055fdb7230018801f7304a56f547cf860e72f7b4c4c0cd9b83e8bb9a7e6a3b9f",
+      "description": "โค้ด host ฝั่ง Linux: เชื่อม lifecycle หน้าต่าง GTK กับ Flutter engine และ plugins ส่วนกฎข้อมูลอยู่ Dart; Firebase options ปัจจุบันยังไม่รองรับ Linux"
+    },
+    {
+      "path": "flutter_application_1/linux/runner/my_application.h",
+      "lines": 21,
+      "sha256": "a4218d7ac0db8a9a6716daf216b2d4fc6bdc7ac647e3183078b2c962ebdfcf70",
+      "description": "โค้ด host ฝั่ง Linux: เชื่อม lifecycle หน้าต่าง GTK กับ Flutter engine และ plugins ส่วนกฎข้อมูลอยู่ Dart; Firebase options ปัจจุบันยังไม่รองรับ Linux"
+    },
+    {
+      "path": "flutter_application_1/macos/Flutter/GeneratedPluginRegistrant.swift",
+      "lines": 24,
+      "sha256": "3096bd7a50b78caaa83f3f68d6656c88be11b58804998861c0fb772f59290d36",
+      "description": "ไฟล์ที่เครื่องมือ Flutter สร้างเพื่อ register plugin ของแพลตฟอร์ม ไม่ใช่กฎธุรกิจ ควรให้ระบบสร้างใหม่เมื่อ dependencies เปลี่ยน"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/AppDelegate.swift",
+      "lines": 13,
+      "sha256": "ce9dbe45a57c59e85519da50a26c471615b9c8cdd85a8f4a39d2e480e62a4af4",
+      "description": "App delegate ของ macOS จัดวงจรชีวิตและนโยบายปิดหน้าต่างของแอป Flutter"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/MainFlutterWindow.swift",
+      "lines": 15,
+      "sha256": "65c9613c11bcedfa51416b16c975d8ba6ff12b405fc19d60db8755d92e86d9fe",
+      "description": "สร้าง FlutterViewController ในหน้าต่าง macOS และ register plugins ก่อนแสดง UI จาก Dart"
+    },
+    {
+      "path": "flutter_application_1/macos/RunnerTests/RunnerTests.swift",
+      "lines": 12,
+      "sha256": "6bc180bc77c7def7a21d197233e25dff42cc493ab9d294632edafc18fdf0ac44",
+      "description": "ชุดทดสอบ: โครงทดสอบฝั่ง native ที่มากับโปรเจกต์ รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/amount_keypad_test.dart",
+      "lines": 74,
+      "sha256": "b5e633ad65d1850fc7f87914dfba9836c0f1d1da20658c6803a7371d6e3490b4",
+      "description": "ชุดทดสอบ: ปุ่มที่มีอยู่จริง ทศนิยมสองหลัก และ sheet บนหน้าจอแคบ รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/bottom_nav_layout_test.dart",
+      "lines": 41,
+      "sha256": "b9a5b08d214be3781f0bad1e1201b23bb9ade98e10b6271645b2d968e1efd0d9",
+      "description": "ชุดทดสอบ: การจัดแนวเมนูล่างในความกว้างและ text scale ต่าง ๆ รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/category_artwork_catalog_test.dart",
+      "lines": 111,
+      "sha256": "99859f8ad269e459bc98dde2003b0184698dff4fb0e569127577c950922c38f4",
+      "description": "ชุดทดสอบ: จำนวนตัวเลือก ID คงที่ และความแตกต่างของช่องภาพใน atlas รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/currency_test.dart",
+      "lines": 28,
+      "sha256": "8d9792e7b11bc4db4d4e3d1b93b9238afe80d8f3d0f9532b66bf67e75db4a662",
+      "description": "ชุดทดสอบ: การตรึงสกุลเงินแต่ละรายการและไม่แปลงยอดเดิม รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/data_service_test.dart",
+      "lines": 270,
+      "sha256": "df12d6f9f1a91d2af6417c039937cdfd19f981267b95f2cf3c3edce9ab1a978b",
+      "description": "ชุดทดสอบ: กฎยอดรวม การบันทึกล้มเหลว การกรองเจ้าของ การแก้รายการ หมวด และความสัมพันธ์รายการโอนกับเป้าหมาย รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/google_login_navigation_test.dart",
+      "lines": 64,
+      "sha256": "e67cb70c7c51080f21cb012ab8127fae8bd1a4426a1122c6067d84fd7d8c9e67",
+      "description": "ชุดทดสอบ: เส้นทางบัญชี Google ใหม่/เดิมและเมื่อ login ล้มเหลว รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/home_goals_test.dart",
+      "lines": 145,
+      "sha256": "66893371e80945b195714ab6ed319713091ed140d850e8043d74a7ee5995e06e",
+      "description": "ชุดทดสอบ: เป้าหมายปักหมุด โน้ต และการเลือกภาพ รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/language_setup_test.dart",
+      "lines": 58,
+      "sha256": "ec1fead9accb3b0a98e22033d042e1546e83de3a91a54f58657a24b1f3efc0eb",
+      "description": "ชุดทดสอบ: preview ค่าเดิม การบันทึก และการไม่ออกจากหน้าถ้าล้มเหลว รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/local_receipt_store_test.dart",
+      "lines": 40,
+      "sha256": "53db7665ea5a428c9d8d2c651492a7d18a0c8c98e2c5133ca68831c8bba5ec64",
+      "description": "ชุดทดสอบ: การเก็บ bytes แยกเจ้าของและการปฏิเสธ path ลบที่ไม่ถูกต้อง รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/password_policy_test.dart",
+      "lines": 25,
+      "sha256": "60087d12df8c70b412c95fa6bbe655f51fccaf3127c319189fb50309d3c8c436",
+      "description": "ชุดทดสอบ: ความยาว ชนิดอักขระ และรหัสผ่านที่ปิดกั้น รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/persisted_icons_test.dart",
+      "lines": 48,
+      "sha256": "070e0fa512f66231bbbcba4b5692ce8986869ee018eb67abcf44516d63f8fee0",
+      "description": "ชุดทดสอบ: ไอคอนที่โหลดกลับจากข้อมูลและ fallback รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/phone_card_layout_test.dart",
+      "lines": 160,
+      "sha256": "229c77554bccc0aabd7f469ed6b673fb714c34fb1035672c0645d73596e2b592",
+      "description": "ชุดทดสอบ: การ์ดบนขนาดโทรศัพท์และ text scale หลายค่า รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/receipt_ocr_assets_test.dart",
+      "lines": 22,
+      "sha256": "51b104b9dd3568641498bab0807c02f710e66d08687ccdb4ced6016723c82cb2",
+      "description": "ชุดทดสอบ: ไฟล์โมเดล OCR ไทย/อังกฤษไม่ใช่หน้า error ที่ดาวน์โหลดผิด รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/receipt_parser_test.dart",
+      "lines": 102,
+      "sha256": "9f0498688dc6ac6566b45967e09eaa283337647f1c3eb87e99712c11eacc59ea",
+      "description": "ชุดทดสอบ: ยอดสุทธิ/ยอดโอน ชื่อผู้รับ เลขไทย วันที่ และการไม่เดาจากข้อมูลกำกวม รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/receipt_service_test.dart",
+      "lines": 29,
+      "sha256": "5a03cace04efe09eece35478b38d92d82c43f63d5282dcb4bff8bd7e079061c7",
+      "description": "ชุดทดสอบ: OCR ไม่มียอด การหมดเวลา และผลลัพธ์ที่ตรวจแก้ได้ รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/reported_issues_widget_test.dart",
+      "lines": 429,
+      "sha256": "c5d3b23e5b2b537082244ba6b88700bf9836cf1622ebf1c1a424d961c335412f",
+      "description": "ชุดทดสอบ: การใช้งาน keypad หมวด กราฟ ประวัติ แก้/ทำซ้ำ และเป้าหมายผ่าน UI รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/responsive_interaction_test.dart",
+      "lines": 223,
+      "sha256": "228bf0cffc6e9e26cb7d6dd5139642272c0a23357c70eca449e6ef2c875a39e3",
+      "description": "ชุดทดสอบ: ฟอร์ม คีย์บอร์ด และ keypad ในหลายขนาด/ธีม รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/responsive_test_support.dart",
+      "lines": 24,
+      "sha256": "208a421554db1991c226eba52dc93232544aee66ca88476d8593de85e9366038",
+      "description": "ชุดทดสอบ: ตัวช่วยสร้างกรอบจอ/สถานะสำหรับการทดสอบ responsive ไม่ใช่หน้าจอจริง รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/success_notice_test.dart",
+      "lines": 73,
+      "sha256": "c400e17b0519ee2b6714ff179fc199151acf960d4b2b1818ab228eff814d83b0",
+      "description": "ชุดทดสอบ: banner สำเร็จหลังการทำรายการ รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/test/thai_slip_formats_test.dart",
+      "lines": 150,
+      "sha256": "3c597b402c1453d402e87704af8e0fbdef8c6889f581938f582f8fa845395924",
+      "description": "ชุดทดสอบ: ป้ายยอดหลายธนาคาร ค่าธรรมเนียม วันที่ไทย/อังกฤษ และชื่อผู้รับ รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    },
+    {
+      "path": "flutter_application_1/tool/receipt_ocr_smoke.dart",
+      "lines": 53,
+      "sha256": "b1bf517ec3389e72f3946cce1786dfa1c844472d750d67243ca6ab51ea6ae42f",
+      "description": "เครื่องมือ smoke test สร้างภาพใบเสร็จตัวอย่างด้วย Canvas/ฟอนต์ Mali แล้วเรียก OCR จริง ตรวจยอด 125.50 และวันที่ เขียนสถานะเป็นไฟล์และแสดงบนจอ"
+    },
+    {
+      "path": "flutter_application_1/tool/receipt_vision_smoke/main.swift",
+      "lines": 38,
+      "sha256": "d259b7a3d40885f6f3e614654efd85c6c654c6cb30a4d12f41e676475a932586",
+      "description": "เครื่องมือ Swift สำหรับลองอ่านภาพผ่าน Vision และตรวจผล OCR นอกหน้าจอแอป ใช้ช่วยวิเคราะห์การรองรับ native"
+    },
+    {
+      "path": "flutter_application_1/web/index.html",
+      "lines": 38,
+      "sha256": "fc29e0df79ef3444173be07fc2476c2a44d87343bdef966966b7dc62236d82ae",
+      "description": "โค้ด HTML/CSS ของหน้าเว็บตาม path: โครง DOM รูปแบบข้อความ ปุ่ม และส่วนเชื่อมสคริปต์; public/reset_password.html ใช้ร่วมกับ reset_password.js ส่วน web/index.html เป็นจุดโหลด Flutter web"
+    },
+    {
+      "path": "flutter_application_1/windows/flutter/generated_plugin_registrant.cc",
+      "lines": 23,
+      "sha256": "d79eeadfc15695b7c06fc63a84af969f7018ee8a3a2d4d297ffbaf5bcf3cad14",
+      "description": "ไฟล์ที่เครื่องมือ Flutter สร้างเพื่อ register plugin ของแพลตฟอร์ม ไม่ใช่กฎธุรกิจ ควรให้ระบบสร้างใหม่เมื่อ dependencies เปลี่ยน"
+    },
+    {
+      "path": "flutter_application_1/windows/flutter/generated_plugin_registrant.h",
+      "lines": 15,
+      "sha256": "dbc11635d7b1ba1887adf40df5b83d634e9c3ab0bee34510c71528bb4d73602a",
+      "description": "ไฟล์ที่เครื่องมือ Flutter สร้างเพื่อ register plugin ของแพลตฟอร์ม ไม่ใช่กฎธุรกิจ ควรให้ระบบสร้างใหม่เมื่อ dependencies เปลี่ยน"
+    },
+    {
+      "path": "flutter_application_1/windows/flutter/generated_plugins.cmake",
+      "lines": 28,
+      "sha256": "bd92fbfc57f657d547c920e34e5c2866c25e22a06e33863e36c5f6e1c41484c6",
+      "description": "ไฟล์ที่เครื่องมือ Flutter สร้างเพื่อ register plugin ของแพลตฟอร์ม ไม่ใช่กฎธุรกิจ ควรให้ระบบสร้างใหม่เมื่อ dependencies เปลี่ยน"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/Runner.rc",
+      "lines": 121,
+      "sha256": "8f2c32989d13e90ceb91ffdbe63c1e84f0402ea2be1c7603d4823369b5b323df",
+      "description": "สคริปต์ CMake สำหรับรวม native plugin หรือ resource script ฝั่ง Windows กำหนดทรัพยากรและขั้นตอน compile/link ไม่ใช่กฎบัญชีการเงิน"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/flutter_window.cpp",
+      "lines": 71,
+      "sha256": "dd185884c0b5301d400b58f12ebb36b1c8b326531597e531b40e44a6eeb0e943",
+      "description": "โค้ด host ฝั่ง Windows: จุดเริ่มโปรแกรม หน้าต่าง Win32 หรือ helper สำหรับ Flutter engine ตามชื่อคลาส/ฟังก์ชันในโค้ด; Firebase options ปัจจุบันยังไม่รองรับ Windows"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/flutter_window.h",
+      "lines": 33,
+      "sha256": "38e0fcd3a0b83895852ec295cb70d90179c0dcd40d58f065eb5232a4ecd84898",
+      "description": "โค้ด host ฝั่ง Windows: จุดเริ่มโปรแกรม หน้าต่าง Win32 หรือ helper สำหรับ Flutter engine ตามชื่อคลาส/ฟังก์ชันในโค้ด; Firebase options ปัจจุบันยังไม่รองรับ Windows"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/main.cpp",
+      "lines": 43,
+      "sha256": "add46983823ea1b17bff5d1fe2ff8d499cb1e91e2c50a6da68d9e5ef7b877051",
+      "description": "โค้ด host ฝั่ง Windows: จุดเริ่มโปรแกรม หน้าต่าง Win32 หรือ helper สำหรับ Flutter engine ตามชื่อคลาส/ฟังก์ชันในโค้ด; Firebase options ปัจจุบันยังไม่รองรับ Windows"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/resource.h",
+      "lines": 16,
+      "sha256": "1fa98588b04561590ba1cf0521ab86a9db4a878312f21c9d5861d965ddd8d1ae",
+      "description": "โค้ด host ฝั่ง Windows: จุดเริ่มโปรแกรม หน้าต่าง Win32 หรือ helper สำหรับ Flutter engine ตามชื่อคลาส/ฟังก์ชันในโค้ด; Firebase options ปัจจุบันยังไม่รองรับ Windows"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/utils.cpp",
+      "lines": 65,
+      "sha256": "dc2ee94d43116f959a4abd42557f71d07acc631abbffe03b11489dbeed35bedb",
+      "description": "โค้ด host ฝั่ง Windows: จุดเริ่มโปรแกรม หน้าต่าง Win32 หรือ helper สำหรับ Flutter engine ตามชื่อคลาส/ฟังก์ชันในโค้ด; Firebase options ปัจจุบันยังไม่รองรับ Windows"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/utils.h",
+      "lines": 19,
+      "sha256": "95a7f7dddb832997cefa937a96f89472332277e75734a5de553610760b744b03",
+      "description": "โค้ด host ฝั่ง Windows: จุดเริ่มโปรแกรม หน้าต่าง Win32 หรือ helper สำหรับ Flutter engine ตามชื่อคลาส/ฟังก์ชันในโค้ด; Firebase options ปัจจุบันยังไม่รองรับ Windows"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/win32_window.cpp",
+      "lines": 288,
+      "sha256": "9065f31ccf746cf8b390121f958f9e959033af864aed779597066625ed56bc36",
+      "description": "โค้ด host ฝั่ง Windows: จุดเริ่มโปรแกรม หน้าต่าง Win32 หรือ helper สำหรับ Flutter engine ตามชื่อคลาส/ฟังก์ชันในโค้ด; Firebase options ปัจจุบันยังไม่รองรับ Windows"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/win32_window.h",
+      "lines": 102,
+      "sha256": "7dd03746b19dcf3542829b2f6e8ed40a2714ce5f2cb3b0e23f0118a2fcf62d62",
+      "description": "โค้ด host ฝั่ง Windows: จุดเริ่มโปรแกรม หน้าต่าง Win32 หรือ helper สำหรับ Flutter engine ตามชื่อคลาส/ฟังก์ชันในโค้ด; Firebase options ปัจจุบันยังไม่รองรับ Windows"
+    },
+    {
+      "path": "functions/index.js",
+      "lines": 27,
+      "sha256": "bc5465d10a9090d792d6ba58f3d39638c0910df16776630bd16d9c8577de59b2",
+      "description": "Cloud Function scanReceipt แบบเดิม ตรวจผู้ใช้ Base64 และขนาด เรียก Cloud Vision แล้วคืน text หรือ HttpsError; ไม่ใช่เส้นทาง OCR ที่ ReceiptService ปัจจุบันเรียก"
+    },
+    {
+      "path": "public/password_policy.js",
+      "lines": 17,
+      "sha256": "00a5c91ab02a871c7c688d83d9cd579ef7ea2e4e905b4c5fc873b1130814b517",
+      "description": "ตัวตรวจ policy สำหรับเว็บที่สร้างจาก JSON เดียวกับ Dart ติดตั้ง BudgetmatePasswordPolicy บน window หรือ globalThis เพื่อใช้ทั้ง browser และ tests"
+    },
+    {
+      "path": "public/reset_password.html",
+      "lines": 114,
+      "sha256": "fb7f8595afea33528819d6d778aa0056930c2605dec3bea524317a7752e2260f",
+      "description": "โค้ด HTML/CSS ของหน้าเว็บตาม path: โครง DOM รูปแบบข้อความ ปุ่ม และส่วนเชื่อมสคริปต์; public/reset_password.html ใช้ร่วมกับ reset_password.js ส่วน web/index.html เป็นจุดโหลด Flutter web"
+    },
+    {
+      "path": "public/reset_password.js",
+      "lines": 256,
+      "sha256": "4e7514207963af4e67c4e74518c370ce2d00e33e375740b97df09bc168af5044",
+      "description": "สคริปต์ควบคุมเว็บรีเซ็ต อ่านลิงก์ ตรวจ oobCode แสดงฟอร์ม ตรวจ policy/ยืนยัน ส่งรหัสใหม่ และจัดการ network/retry/สถานะปุ่ม"
+    },
+    {
+      "path": "scripts/generate_password_policy.py",
+      "lines": 42,
+      "sha256": "6334ca9fdb468654df58b85c8d85b2f181f939d504886c3cab4a4e905e81768f",
+      "description": "อ่าน config/password_policy.json แล้วเขียนตัวตรวจสองภาษา Dart/JavaScript ให้ใช้ความยาว regex และ blocklist เดียวกัน"
+    },
+    {
+      "path": "storage.rules",
+      "lines": 12,
+      "sha256": "5faf8bf108a88c9122ff9b6f1fe038bfc740aa39a15fa21ea77da5dc9d022337",
+      "description": "กฎ Firebase Security Rules ตรวจสิทธิ์ตาม uid เจ้าของและเงื่อนไขข้อมูล; อ่านบท 11 ประกอบ ไม่ยืนยันว่าไฟล์นี้ถูก deploy แล้ว"
+    },
+    {
+      "path": "tests/reset_password.test.cjs",
+      "lines": 110,
+      "sha256": "233a83a9a71445e679f19e46c1ad06d2396e45c980b0b81586d24a21c7e1f8dd",
+      "description": "ชุดทดสอบ: เว็บลิงก์รีเซ็ต เครือข่าย retry การยืนยันรหัสและการส่งเพียงครั้งเดียว รายชื่อกรณีด้านล่างดึงจาก test declarations; การมีกรณีทดสอบไม่ได้หมายความว่ารอบนี้ได้รันผ่านแล้ว"
+    }
+  ],
+  "support_files": [
+    {
+      "path": ".firebaserc",
+      "description": "Firebase project alias สำหรับเครื่องมือ deploy"
+    },
+    {
+      "path": ".gitignore",
+      "description": "รายการไฟล์ที่ Git ไม่ติดตาม เช่น cache/build และค่าท้องถิ่น"
+    },
+    {
+      "path": "README.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "config/password_policy.json",
+      "description": "ต้นฉบับกฎรหัสผ่านที่ generator ใช้สร้าง Dart และ JavaScript"
+    },
+    {
+      "path": "docs/app-flowchart.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "docs/app-flowchart.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "docs/income-expense-presentation.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "docs/user-manual-appendix.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "firestore.indexes.json",
+      "description": "ดัชนีสำหรับกรอง transactions ตามผู้ใช้และเรียงวันที่"
+    },
+    {
+      "path": "flutter_application_1/.gitignore",
+      "description": "รายการไฟล์ที่ Git ไม่ติดตาม เช่น cache/build และค่าท้องถิ่น"
+    },
+    {
+      "path": "flutter_application_1/.metadata",
+      "description": "ไฟล์ประกอบการตั้งค่าหรือทรัพยากรของโปรเจกต์ตาม path ไม่อยู่ในกลุ่มโค้ดธุรกิจ Dart"
+    },
+    {
+      "path": "flutter_application_1/FUNCTION_CHECK.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/OFFLINE_RECEIPTS.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/analysis_options.yaml",
+      "description": "ตั้งค่าการวิเคราะห์และ lint ของ Dart"
+    },
+    {
+      "path": "flutter_application_1/android/.gitignore",
+      "description": "รายการไฟล์ที่ Git ไม่ติดตาม เช่น cache/build และค่าท้องถิ่น"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/debug/AndroidManifest.xml",
+      "description": "Android manifest หรือ resource สำหรับสิทธิ์และหน้าตา native"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/res/drawable-v21/launch_background.xml",
+      "description": "Android manifest หรือ resource สำหรับสิทธิ์และหน้าตา native"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/res/drawable/launch_background.xml",
+      "description": "Android manifest หรือ resource สำหรับสิทธิ์และหน้าตา native"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/res/mipmap-hdpi/ic_launcher.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/res/mipmap-mdpi/ic_launcher.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/res/values-night/styles.xml",
+      "description": "Android manifest หรือ resource สำหรับสิทธิ์และหน้าตา native"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/main/res/values/styles.xml",
+      "description": "Android manifest หรือ resource สำหรับสิทธิ์และหน้าตา native"
+    },
+    {
+      "path": "flutter_application_1/android/app/src/profile/AndroidManifest.xml",
+      "description": "Android manifest หรือ resource สำหรับสิทธิ์และหน้าตา native"
+    },
+    {
+      "path": "flutter_application_1/android/gradle.properties",
+      "description": "ตั้งค่าการ build Android, plugins, SDK, Java/Kotlin หรือ Gradle wrapper"
+    },
+    {
+      "path": "flutter_application_1/android/gradle/wrapper/gradle-wrapper.properties",
+      "description": "ตั้งค่าการ build Android, plugins, SDK, Java/Kotlin หรือ Gradle wrapper"
+    },
+    {
+      "path": "flutter_application_1/assets/fonts/Mali-Bold.ttf",
+      "description": "ไฟล์ฟอนต์ Mali ประกาศน้ำหนักใน pubspec.yaml"
+    },
+    {
+      "path": "flutter_application_1/assets/fonts/Mali-ExtraLight.ttf",
+      "description": "ไฟล์ฟอนต์ Mali ประกาศน้ำหนักใน pubspec.yaml"
+    },
+    {
+      "path": "flutter_application_1/assets/fonts/Mali-Light.ttf",
+      "description": "ไฟล์ฟอนต์ Mali ประกาศน้ำหนักใน pubspec.yaml"
+    },
+    {
+      "path": "flutter_application_1/assets/fonts/Mali-Medium.ttf",
+      "description": "ไฟล์ฟอนต์ Mali ประกาศน้ำหนักใน pubspec.yaml"
+    },
+    {
+      "path": "flutter_application_1/assets/fonts/Mali-Regular.ttf",
+      "description": "ไฟล์ฟอนต์ Mali ประกาศน้ำหนักใน pubspec.yaml"
+    },
+    {
+      "path": "flutter_application_1/assets/fonts/Mali-SemiBold.ttf",
+      "description": "ไฟล์ฟอนต์ Mali ประกาศน้ำหนักใน pubspec.yaml"
+    },
+    {
+      "path": "flutter_application_1/assets/icon/budgetmate_icon.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/ChatGPT Image 31 ส.ค. 2569 23_59_21.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/beauty_lipstick_pastel.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c01.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c02.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c03.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c04.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c05.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c06.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c07.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c08.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c09.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c10.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c11.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c12.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c13.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c14.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c15.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c16.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c17.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c18.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c19.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c20.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c21.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c22.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c23.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c24.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c25.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c26.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c27.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c28.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c29.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c30.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c31.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c32.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c33.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c34.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c35.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c36.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c37.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c38.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c39.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c40.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c41.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c42.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c43.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c44.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c45.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c46.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c47.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c48.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c49.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c50.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c51.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c52.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c53.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c54.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/c55.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_atlas.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_atlas_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_00.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_00_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_01.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_01_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_02.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_02_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_03.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_03_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_04.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_04_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_05.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_05_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_06.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_06_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_07.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_07_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_08.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_08_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_09.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_09_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_10.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_10_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_11.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_collection_11_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_extra_atlas.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/pastel_extra_atlas_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/categories/peach_transparent.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/google_logo.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/images/loading.gif",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/assets/tessdata/LICENSE",
+      "description": "ไฟล์ประกอบการตั้งค่าหรือทรัพยากรของโปรเจกต์ตาม path ไม่อยู่ในกลุ่มโค้ดธุรกิจ Dart"
+    },
+    {
+      "path": "flutter_application_1/assets/tessdata/README.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/assets/tessdata/eng.traineddata",
+      "description": "โมเดลภาษา OCR ที่ Tesseract โหลดจาก assets"
+    },
+    {
+      "path": "flutter_application_1/assets/tessdata/tha.traineddata",
+      "description": "โมเดลภาษา OCR ที่ Tesseract โหลดจาก assets"
+    },
+    {
+      "path": "flutter_application_1/assets/tessdata_config.json",
+      "description": "กำหนดไฟล์โมเดลภาษาให้ plugin OCR"
+    },
+    {
+      "path": "flutter_application_1/design/app_icon_prompt.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/design/beauty_lipstick_prompt.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/design/pastel_artwork_prompt.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/design/pastel_collection_prompts.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/design/responsive_layout_review.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/design/test_case_fixes.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/design/transparent_category_artwork.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/ios/.gitignore",
+      "description": "รายการไฟล์ที่ Git ไม่ติดตาม เช่น cache/build และค่าท้องถิ่น"
+    },
+    {
+      "path": "flutter_application_1/ios/Flutter/AppFrameworkInfo.plist",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/ios/Flutter/Debug.xcconfig",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/ios/Flutter/Release.xcconfig",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/ios/Podfile",
+      "description": "กำหนดการรวม dependencies native ผ่าน CocoaPods"
+    },
+    {
+      "path": "flutter_application_1/ios/Podfile.lock",
+      "description": "ตรึงรุ่น dependencies ที่ resolve แล้ว ไม่ใช่โค้ดธุรกิจ"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "description": "metadata รายการรูปและขนาดใน Apple asset catalog"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json",
+      "description": "metadata รายการรูปและขนาดใน Apple asset catalog"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Base.lproj/LaunchScreen.storyboard",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Base.lproj/Main.storyboard",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/GoogleService-Info.plist",
+      "description": "ค่าระบุแอป Firebase ฝั่ง Apple ไม่ใช่ตัวจัดการบัญชีหรือฐานข้อมูล"
+    },
+    {
+      "path": "flutter_application_1/ios/Runner/Info.plist",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/linux/.gitignore",
+      "description": "รายการไฟล์ที่ Git ไม่ติดตาม เช่น cache/build และค่าท้องถิ่น"
+    },
+    {
+      "path": "flutter_application_1/linux/CMakeLists.txt",
+      "description": "ตั้งค่าการ compile/link Flutter host และ plugins บน desktop"
+    },
+    {
+      "path": "flutter_application_1/linux/flutter/CMakeLists.txt",
+      "description": "ตั้งค่าการ compile/link Flutter host และ plugins บน desktop"
+    },
+    {
+      "path": "flutter_application_1/linux/runner/CMakeLists.txt",
+      "description": "ตั้งค่าการ compile/link Flutter host และ plugins บน desktop"
+    },
+    {
+      "path": "flutter_application_1/macos/.gitignore",
+      "description": "รายการไฟล์ที่ Git ไม่ติดตาม เช่น cache/build และค่าท้องถิ่น"
+    },
+    {
+      "path": "flutter_application_1/macos/Flutter/Flutter-Debug.xcconfig",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Flutter/Flutter-Release.xcconfig",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Podfile",
+      "description": "กำหนดการรวม dependencies native ผ่าน CocoaPods"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner.xcodeproj/project.pbxproj",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner.xcworkspace/contents.xcworkspacedata",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "description": "metadata รายการรูปและขนาดใน Apple asset catalog"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Base.lproj/MainMenu.xib",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Configs/AppInfo.xcconfig",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Configs/Debug.xcconfig",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Configs/Release.xcconfig",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Configs/Warnings.xcconfig",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/DebugProfile.entitlements",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/GoogleService-Info.plist",
+      "description": "ค่าระบุแอป Firebase ฝั่ง Apple ไม่ใช่ตัวจัดการบัญชีหรือฐานข้อมูล"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Info.plist",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/macos/Runner/Release.entitlements",
+      "description": "ตั้งค่า Apple build, สิทธิ์, workspace หรือหน้าต่าง/launch screen ตามชนิดไฟล์"
+    },
+    {
+      "path": "flutter_application_1/pubspec.lock",
+      "description": "ตรึงรุ่น dependencies ที่ resolve แล้ว ไม่ใช่โค้ดธุรกิจ"
+    },
+    {
+      "path": "flutter_application_1/pubspec.yaml",
+      "description": "ชื่อแอป SDK constraint dependencies assets และฟอนต์"
+    },
+    {
+      "path": "flutter_application_1/web/favicon.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/web/icons/Icon-192.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/web/icons/Icon-512.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/web/icons/Icon-maskable-192.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/web/icons/Icon-maskable-512.png",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/web/manifest.json",
+      "description": "ชื่อ ไอคอน และข้อมูลติดตั้ง Flutter web"
+    },
+    {
+      "path": "flutter_application_1/windows/.gitignore",
+      "description": "รายการไฟล์ที่ Git ไม่ติดตาม เช่น cache/build และค่าท้องถิ่น"
+    },
+    {
+      "path": "flutter_application_1/windows/CMakeLists.txt",
+      "description": "ตั้งค่าการ compile/link Flutter host และ plugins บน desktop"
+    },
+    {
+      "path": "flutter_application_1/windows/flutter/CMakeLists.txt",
+      "description": "ตั้งค่าการ compile/link Flutter host และ plugins บน desktop"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/CMakeLists.txt",
+      "description": "ตั้งค่าการ compile/link Flutter host และ plugins บน desktop"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/resources/app_icon.ico",
+      "description": "รูป/ไอคอน/ภาพเคลื่อนไหว ใช้แสดง UI หรือภาพเอกสาร ไม่ใช่ตรรกะโปรแกรม"
+    },
+    {
+      "path": "flutter_application_1/windows/runner/runner.exe.manifest",
+      "description": "ไฟล์ประกอบการตั้งค่าหรือทรัพยากรของโปรเจกต์ตาม path ไม่อยู่ในกลุ่มโค้ดธุรกิจ Dart"
+    },
+    {
+      "path": "functions/README.md",
+      "description": "เอกสารคู่มือ การออกแบบ หรือการตั้งค่า ควรเทียบกับ implementation ปัจจุบันเสมอ"
+    },
+    {
+      "path": "functions/package-lock.json",
+      "description": "ตรึงรุ่น dependencies ที่ resolve แล้ว ไม่ใช่โค้ดธุรกิจ"
+    },
+    {
+      "path": "functions/package.json",
+      "description": "entry point ของ backend, Node engine และ dependencies"
+    },
+    {
+      "path": "public/fonts/Mali-Regular.ttf",
+      "description": "ไฟล์ฟอนต์ Mali ประกาศน้ำหนักใน pubspec.yaml"
+    },
+    {
+      "path": "public/fonts/Mali-SemiBold.ttf",
+      "description": "ไฟล์ฟอนต์ Mali ประกาศน้ำหนักใน pubspec.yaml"
+    },
+    {
+      "path": "public/reset_password.css",
+      "description": "ไฟล์ประกอบการตั้งค่าหรือทรัพยากรของโปรเจกต์ตาม path ไม่อยู่ในกลุ่มโค้ดธุรกิจ Dart"
+    }
+  ],
+  "missing_tracked_files": [
+    "RESET_PASSWORD_SETUP.md",
+    "firebase.json",
+    "flutter_application_1/README.md",
+    "flutter_application_1/android/app/google-services.json",
+    "flutter_application_1/android/app/src/main/AndroidManifest.xml",
+    "flutter_application_1/firebase.json",
+    "flutter_application_1/ios/Runner.xcodeproj/project.pbxproj",
+    "flutter_application_1/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+    "flutter_application_1/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+    "flutter_application_1/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+    "flutter_application_1/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+    "flutter_application_1/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme",
+    "flutter_application_1/ios/Runner.xcworkspace/contents.xcworkspacedata",
+    "flutter_application_1/ios/Runner.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+    "flutter_application_1/ios/Runner.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
+    "flutter_application_1/ios/Runner.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+    "flutter_application_1/ios/Runner/AppDelegate.swift",
+    "flutter_application_1/lib/services/exchange_rate_service.dart"
+  ]
+}

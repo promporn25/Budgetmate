@@ -1,0 +1,7 @@
+Code files: 113
+Code lines: 19427
+Support files: 216
+Verified excerpts: 36
+All lib Dart files covered: yes
+Internal HTML anchors: valid
+App tests executed for this documentation task: no

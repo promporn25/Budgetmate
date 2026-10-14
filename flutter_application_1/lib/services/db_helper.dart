@@ -53,6 +53,44 @@ class DBHelper {
   }
 
  
+  /// Keep an edited/deleted savings transfer and its goal in one commit.
+  Future<Map<String, dynamic>?> changeGoalTransfer(
+      String id, Map<String, dynamic>? replacement) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) throw StateError('กรุณาเข้าสู่ระบบก่อน');
+    final entryRef = _col('transactions').doc(id);
+    return _fs.runTransaction((transaction) async {
+      final old = (await transaction.get(entryRef)).data();
+      if (old == null || old['user_id'] != uid) throw StateError('ไม่พบรายการ');
+      final description = old['description'] as String? ?? '';
+      if (!description.startsWith('goal_transfer:')) throw StateError('ไม่ใช่รายการโอน');
+      final goalRef = _col('goals').doc(description.substring('goal_transfer:'.length));
+      final goal = (await transaction.get(goalRef)).data();
+      Map<String, dynamic>? updatedGoal;
+      if (goal != null) {
+        if (goal['user_id'] != uid) throw StateError('ไม่พบเป้าหมาย');
+        double contribution(Map<String, dynamic>? row) => row != null &&
+            row['type'] == 'expense' && row['category_id'] == 'c17'
+            ? (row['amount'] as num).toDouble() : 0;
+        final saved = (goal['saved_amount'] as num).toDouble()
+            - contribution(old) + contribution(replacement);
+        final target = (goal['target_amount'] as num).toDouble();
+        if (!saved.isFinite || saved < 0 || saved > target) {
+          throw StateError('ยอดเงินออมหลังแก้ไขต้องอยู่ระหว่าง 0 ถึงยอดเป้าหมาย');
+        }
+        updatedGoal = {...goal, 'saved_amount': saved,
+          'status': saved >= target ? 'completed' : 'inProgress'};
+        transaction.update(goalRef, updatedGoal);
+      }
+      if (replacement == null) {
+        transaction.delete(entryRef);
+      } else {
+        transaction.update(entryRef, replacement);
+      }
+      return updatedGoal;
+    });
+  }
+
   Never _handleError(Object e, StackTrace st, String fallbackMessage) {
   
     debugPrint('[DBHelper] RAW ERROR TYPE=${e.runtimeType} VALUE=$e');

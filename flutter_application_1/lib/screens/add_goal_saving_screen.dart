@@ -1,3 +1,8 @@
+import '../widgets/success_notice.dart';
+import '../widgets/category_editor_sheet.dart';
+import '../widgets/category_artwork_catalog.dart';
+import '../widgets/amount_keypad.dart';
+import '../models/goal_model.dart';
 import '../models/category_model.dart';
 import '../widgets/pastel_artwork.dart';
 import 'package:budgetmate/screens/app_theme.dart';
@@ -16,10 +21,6 @@ const List<IconData> _goalIcons = [
 ];
 
 // ชุดสีพาสเทลของไอคอนเป้าหมาย (โทนเดียวกับหน้า Add Income/Expense)
-const List<Color> _goalTint = [
-  Color(0xFFDCEEF7), Color(0xFFFBE1E9), Color(0xFFFFF3D2), Color(0xFFE7E3F7),
-  Color(0xFFDFF3E7), Color(0xFFFFE8D9), Color(0xFFDCF3F1), Color(0xFFF3E4EF),
-];
 const List<Color> _goalTintIcon = [
   Color(0xFF6FA3D6), Color(0xFFD9789B), Color(0xFFC79A3B), Color(0xFF8C79C9),
   Color(0xFF54A57E), Color(0xFFDB8A55), Color(0xFF4FA79C), Color(0xFFB1699F),
@@ -28,7 +29,8 @@ const List<Color> _goalTintIcon = [
 /// หน้า Add Goal Saving (3.4.12) - เพิ่มเป้าหมายการออมเงินใหม่ลง SQLite
 /// ปรับดีไซน์ให้นุ่มนวล มีมิติ และเพิ่มช่องหมายเหตุ (optional) ให้เหมือนหน้า Add Income/Expense
 class AddGoalSavingScreen extends StatefulWidget {
-  const AddGoalSavingScreen({super.key});
+  const AddGoalSavingScreen({super.key, this.goal});
+  final GoalModel? goal;
 
   @override
   State<AddGoalSavingScreen> createState() => _AddGoalSavingScreenState();
@@ -37,13 +39,19 @@ class AddGoalSavingScreen extends StatefulWidget {
 class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
   // ความสูงคงที่ของแผงปุ่มตัวเลขที่จะเลื่อนขึ้นมาจากด้านล่าง
   // (ดีไซน์เดียวกับหน้า Add Income/Expense)
-  static const double _numpadHeight = 300;
+  static const double _numpadHeight = AmountKeypad.height + 18;
   static const Duration _numpadAnim = Duration(milliseconds: 260);
 
   IconData _selectedIcon = _goalIcons.first;
+  int? _artworkNumber;
   final _nameCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
-  String _amountText = '';
+  final _amountController = TextEditingController();
+  String get _amountText => _amountController.text;
+  set _amountText(String value) {
+    _amountController.value = TextEditingValue(
+      text: value, selection: TextSelection.collapsed(offset: value.length));
+  }
   DateTime _targetDate = DateTime.now().add(const Duration(days: 180));
   bool _saving = false;
 
@@ -51,9 +59,29 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
   bool _showNumpad = false;
 
   @override
+  void initState() {
+    super.initState();
+    _amountController.addListener(_amountChanged);
+    final goal = widget.goal;
+    if (goal != null) {
+      _artworkNumber = goal.artworkNumber;
+      _nameCtrl.text = goal.name;
+      _noteCtrl.text = goal.note ?? '';
+      _amountText = goal.targetAmount.toString();
+      _targetDate = goal.targetDate;
+      _selectedIcon = _goalIcons.firstWhere((icon) => icon.codePoint == goal.icon.codePoint, orElse: () => goal.icon);
+    }
+  }
+
+  void _amountChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
     _nameCtrl.dispose();
     _noteCtrl.dispose();
+    _amountController.dispose();
     super.dispose();
   }
 
@@ -91,25 +119,11 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
     });
   }
 
-  void _pressDigit(String d) {
-    HapticFeedback.selectionClick();
-    setState(() {
-      if (d == '.' && _amountText.contains('.')) return;
-      _amountText += d;
-    });
-  }
-
-  void _backspace() {
-    if (_amountText.isEmpty) return;
-    HapticFeedback.selectionClick();
-    setState(() => _amountText = _amountText.substring(0, _amountText.length - 1));
-  }
-
   Future<void> _save() async {
     if (_saving) return;
     final amount = double.tryParse(_amountText) ?? 0;
     final service = context.read<DataService>();
-    if (_nameCtrl.text.isEmpty || amount <= 0) {
+    if (_nameCtrl.text.trim().isEmpty || !amount.isFinite || amount <= 0) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(service.t('fill_name_and_amount'))));
       return;
@@ -118,17 +132,22 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
     setState(() => _saving = true);
     HapticFeedback.mediumImpact();
 
-    final error = await service.addGoal(
+    final error = widget.goal != null
+        ? await service.editGoal(widget.goal!.id, name: _nameCtrl.text.trim(),
+            targetAmount: amount, targetDate: _targetDate, icon: _selectedIcon, artworkNumber: _artworkNumber,
+            note: _noteCtrl.text.trim())
+        : await service.addGoal(
           name: _nameCtrl.text,
           targetAmount: amount,
           targetDate: _targetDate,
-          icon: _selectedIcon,
+          icon: _selectedIcon, artworkNumber: _artworkNumber,
           note: _noteCtrl.text.isEmpty ? null : _noteCtrl.text,
         );
 
     if (!mounted) return;
 
     if (error == null) {
+      showSuccessNotice(context, widget.goal == null ? 'goal_saved' : 'goal_updated');
       Navigator.pop(context);
     } else {
       setState(() => _saving = false);
@@ -141,6 +160,19 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
     final service = context.watch<DataService>();
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final panelHeight = _numpadHeight + bottomInset;
+    final compactPhone = MediaQuery.sizeOf(context).width <= 360 || MediaQuery.sizeOf(context).height <= 667;
+    final compactSectionGap = compactPhone ? 8.0 : 12.0;
+    // Include the translated "other" label at the actual system font size.
+    final labelPainter = TextPainter(
+      text: TextSpan(text: service.t('other_category'),
+        style: const TextStyle(fontFamily: appFontFamily, fontSize: 11, height: 1.4)),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: (MediaQuery.sizeOf(context).width - 24 -
+        (compactPhone ? 8 : 12)) / (compactPhone ? 3 : 4));
+    final compactGridHeight = (compactPhone ? 30.0 : (_showNumpad ? 36.0 : 44.0)) +
+        4 + labelPainter.height + 4;
+    labelPainter.dispose();
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -148,11 +180,11 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
         backgroundColor: AppColors.bg,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
-        title: Text(service.t('goal_saving'),
+        title: Text(service.t(widget.goal == null ? 'goal_saving' : 'edit_goal'),
             style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.only(right: 10),
             child: Center(child: _saveButton(service)),
           ),
         ],
@@ -161,12 +193,17 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
         children: [
           // ----- เนื้อหาหลักของหน้า -----
           Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
+            child: LayoutBuilder(builder: (context, constraints) {
+              final scrollAll = MediaQuery.viewInsetsOf(context).bottom > 0 ||
+                  constraints.maxHeight < (_showNumpad ? 650 : 360);
+              final form = Padding(
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
+                  Flexible(
+                    flex: scrollAll ? 0 : 1,
+                    fit: FlexFit.tight,
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,59 +214,29 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
                             hint: service.t('goal_name_hint'),
                             icon: Icons.flag_outlined,
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: compactPhone ? 8 : 16),
                           // ----- 2. หมวดหมู่ (เลือกไอคอนเป้าหมาย) -----
-                          Row(
-                            children: [
-                              Text(service.t('categories'), style: AppTextStyles.heading),
-                              const Spacer(),
-                              Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      _goalTint[_goalIcons.indexOf(_selectedIcon) % _goalTint.length],
-                                      Colors.white,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: _goalTintIcon[_goalIcons.indexOf(_selectedIcon) % _goalTintIcon.length]
-                                          .withOpacity(0.3),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: GoalArtwork(_selectedIcon,
-                                    size: 16,
-                                    color: _goalTintIcon[_goalIcons.indexOf(_selectedIcon) % _goalTintIcon.length]),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
+                          Text(service.t('categories'), style: AppTextStyles.heading),
+                          SizedBox(height: compactPhone ? 6 : 10),
                           GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             padding: EdgeInsets.zero,
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              mainAxisSpacing: 8,
-                              crossAxisSpacing: 4,
-                              mainAxisExtent: _showNumpad ? 72 : 96,
+                              crossAxisCount: compactPhone ? 3 : 4,
+                              mainAxisSpacing: compactPhone ? 6 : 8,
+                              crossAxisSpacing: compactPhone ? 4 : 4,
+                              mainAxisExtent: compactGridHeight,
                             ),
-                            itemCount: _goalIcons.length,
-                            itemBuilder: (context, index) => _goalCategoryTile(
+                            itemCount: _goalIcons.length + 1,
+                            itemBuilder: (context, index) => index == _goalIcons.length
+                              ? _otherArtworkTile(service) : _goalCategoryTile(
                               defaultCategories[index], service, index),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: compactPhone ? 10 : 16),
                           // ----- 3. วันที่เป้าหมาย -----
                           _dateCard(service),
-                          const SizedBox(height: 16),
+                          SizedBox(height: compactSectionGap),
                         ],
                       ),
                     ),
@@ -248,7 +255,7 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
                         duration: _numpadAnim,
                         opacity: _showNumpad ? 0 : 1,
                         child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: EdgeInsets.only(bottom: compactPhone ? 4 : 8),
                           child: AppTextField(
                             controller: _noteCtrl,
                             hint: service.t('note_optional'),
@@ -265,22 +272,17 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
                   AnimatedContainer(
                     duration: _numpadAnim,
                     curve: Curves.easeOutCubic,
-                    height: _showNumpad ? panelHeight : bottomInset + 8,
+                    height: _showNumpad ? (scrollAll ? 0 : panelHeight) : (compactPhone ? bottomInset + 4 : bottomInset + 8),
                   ),
                 ],
               ),
-            ),
+            );
+              return scrollAll ? Padding(
+                padding: EdgeInsets.only(bottom: _showNumpad ? panelHeight : 0),
+                child: SingleChildScrollView(reverse: _showNumpad, child: form),
+              ) : form;
+            }),
           ),
-
-          // ----- ฉากทึบใส สำหรับแตะนอกพื้นที่แป้นตัวเลขเพื่อปิดแป้น -----
-          if (_showNumpad)
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: _closeNumpad,
-                child: Container(color: Colors.transparent),
-              ),
-            ),
 
           // ----- แผงปุ่มตัวเลข เลื่อนขึ้นจากด้านล่าง เฉพาะตอนต้องการพิมพ์จำนวนเงิน -----
           AnimatedPositioned(
@@ -302,7 +304,7 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
       onTap: _saving ? null : _save,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [AppColors.accentPink, AppColors.accentDeep],
@@ -329,12 +331,50 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
     );
   }
 
+  Widget _otherArtworkTile(DataService service) {
+    final selected = _artworkNumber != null && _artworkNumber! > 13;
+    final compactPhone = MediaQuery.sizeOf(context).width <= 360 || MediaQuery.sizeOf(context).height <= 667;
+    final tileSize = compactPhone ? 30.0 : (_showNumpad ? 36.0 : 44.0);
+    final iconSize = compactPhone ? 20.0 : 25.0;
+    return InkWell(
+      key: const Key('goal-other-artwork'),
+      borderRadius: BorderRadius.circular(20),
+      onTap: () async {
+        _closeNumpad();
+        final choice = await showCategoryArtworkPicker(context,
+          service: service, selected: _artworkNumber ?? _goalIcons.indexOf(_selectedIcon) + 1);
+        if (!mounted || choice == null) return;
+        setState(() {
+          _artworkNumber = artworkNumberOf(choice);
+          _selectedIcon = choice.icon;
+        });
+      },
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Container(width: tileSize, height: tileSize,
+          decoration: BoxDecoration(color: AppColors.accentBg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: selected ? AppColors.accentPink : AppColors.border,
+              width: selected ? 2 : 1)),
+          child: selected
+            ? PastelArtwork(categoryNumber: _artworkNumber!, size: compactPhone ? 26 : (_showNumpad ? 40 : 56))
+            : Icon(Icons.add_rounded, color: AppColors.ink, size: iconSize)),
+        const SizedBox(height: 4),
+        Text(service.t('other_category'), style: TextStyle(fontFamily: appFontFamily, fontSize: 11, height: 1.4, color: AppColors.ink)),
+      ]),
+    );
+  }
+
   // ---------- การ์ดเลือกวันที่เป้าหมาย ----------
   Widget _goalCategoryTile(CategoryModel c, DataService service, int index) {
-    final selected = _selectedIcon == c.icon;
+    final compactPhone = MediaQuery.sizeOf(context).width <= 360 || MediaQuery.sizeOf(context).height <= 667;
+    final selected = _artworkNumber == null
+        ? _selectedIcon.codePoint == c.icon.codePoint
+        : _artworkNumber == index + 1;
     final tintIcon = _goalTintIcon[index % _goalTintIcon.length];
     final pastel = [AppColors.accentBg, AppColors.accentAltBg,
       const Color(0xFFEAE5FA), const Color(0xFFE1F2EC)][index % 4];
+    final tileSize = compactPhone ? 30.0 : (_showNumpad ? 36.0 : 44.0);
+    final iconSize = compactPhone ? 20.0 : (_showNumpad ? 30.0 : 36.0);
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -342,6 +382,7 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
         HapticFeedback.selectionClick();
         setState(() {
           _selectedIcon = c.icon;
+          _artworkNumber = index + 1;
 
         });
       },
@@ -356,8 +397,8 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
             child: AnimatedContainer(
             duration: Duration.zero,
             curve: Curves.easeOut,
-            width: _showNumpad ? 44 : 60,
-            height: _showNumpad ? 44 : 60,
+            width: tileSize,
+            height: tileSize,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(_showNumpad ? 15 : 20),
               gradient: LinearGradient(
@@ -384,8 +425,8 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
             // (คอนเทนเนอร์ 60x60 ด้านนอก) ขยายขนาดตามไปด้วย
             child: Center(
               child: SizedBox(
-                width: _showNumpad ? 38 : 52,
-                height: _showNumpad ? 38 : 52,
+                width: iconSize,
+                height: iconSize,
                 child: ColorFiltered(
                   colorFilter: const ColorFilter.matrix([
                     0.86, 0.08, 0.06, 0, 5,
@@ -396,9 +437,9 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
                   child: CategoryIcon(
                   category: c,
                   color: selected ? AppColors.accentDeep : tintIcon,
-                  size: _showNumpad ? 38 : 52,
+                  size: iconSize,
                   fill: true,
-                  zoom: 1.12,
+                  zoom: compactPhone ? 1.0 : 1.12,
                   ),
                 ),
               ),
@@ -436,7 +477,7 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
               barrierColor: Colors.black.withOpacity(0.45),
               builder: (_) => PastelCalendarDialog(
                 initialDate: _targetDate,
-                firstDate: DateTime.now(),
+                firstDate: widget.goal == null ? DateTime.now() : DateTime(2000),
                 lastDate: DateTime.now().add(const Duration(days: 3650)),
                 isThai: isThai,
               ),
@@ -444,7 +485,7 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
             if (picked != null) setState(() => _targetDate = picked);
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Row(
               children: [
                 Container(
@@ -485,12 +526,15 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
     final service = context.read<DataService>();
     final showPlaceholder = !_showNumpad && _amountText.isEmpty;
 
-    return GestureDetector(
+    return TapRegion(
+      groupId: 'goal-amount',
+      onTapOutside: (_) => _closeNumpad(),
+      child: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _openNumpad,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -516,7 +560,7 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
                     child: Text(
                       service.t('enter_valid_amount'),
                       textAlign: TextAlign.right,
-                      style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                     ),
                   ),
                 ],
@@ -525,14 +569,17 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
+                  Flexible(child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    reverse: true,
+                    child: Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         _amountText,
                         style: TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                            fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                       ),
                       if (_showNumpad) ...[
                         const SizedBox(width: 3),
@@ -542,10 +589,10 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
                       Text(
                         context.watch<DataService>().currencySymbol,
                         style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink),
+                            fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink),
                       ),
                     ],
-                  ),
+                  ))),
                   if (_showNumpad) ...[
                     const SizedBox(width: 10),
                     GestureDetector(
@@ -576,12 +623,14 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
                 ],
               ),
       ),
-    );
+    ));
   }
 
   // แผงปุ่มตัวเลขทั้งชุด (ความสูงคงที่ ลอยขึ้นมาจากขอบล่างจอ)
   Widget _numpadPanel(double bottomInset) {
-    return Material(
+    return TapRegion(
+      groupId: 'goal-amount',
+      child: Material(
       color: AppColors.bg,
       elevation: 20,
       shadowColor: Colors.black.withOpacity(0.18),
@@ -606,103 +655,14 @@ class _AddGoalSavingScreenState extends State<AddGoalSavingScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
-  Widget _numPad() {
-    const rows = [
-      ['7', '8', '9'],
-      ['4', '5', '6'],
-      ['1', '2', '3'],
-      ['.', '0', '⌫'],
-    ];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Column(
-        children: rows
-            .map((row) => Expanded(
-                  child: Row(
-                    children: row
-                        .map((key) => Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: _keyBg(key),
-                                    borderRadius: BorderRadius.circular(22),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: _keyShadow(key),
-                                        offset: const Offset(0, 3),
-                                        blurRadius: 0,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    borderRadius: BorderRadius.circular(22),
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(22),
-                                      onTap: () => key == '⌫' ? _backspace() : _pressDigit(key),
-                                      child: Center(
-                                        child: key == '⌫'
-                                            ? Icon(Icons.backspace_rounded, size: 20, color: _keyFg(key))
-                                            : Text(key,
-                                                style: TextStyle(
-                                                    fontSize: 24,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: _keyFg(key))),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ))
-                        .toList(),
-                  ),
-                ))
-            .toList(),
-      ),
-    );
-  }
-
-  Color _keyBg(String key) {
-    switch (key) {
-      case '⌫':
-        return const Color(0xFFDCEEF7);
-      case '.':
-        return const Color(0xFFFFF3D2);
-      default:
-        return AppColors.surface;
-    }
-  }
-
-  Color _keyFg(String key) {
-    switch (key) {
-      case '⌫':
-        return const Color(0xFF6FA3D6);
-      case '.':
-        return const Color(0xFFC79A3B);
-      default:
-        return AppColors.textPrimary;
-    }
-  }
-
-  Color _keyShadow(String key) {
-    switch (key) {
-      case '⌫':
-        return const Color(0xFFC3E0F0);
-      case '.':
-        return const Color(0xFFF0DFA8);
-      default:
-        return AppColors.border.withOpacity(0.8);
-    }
-  }
+  Widget _numPad() => AmountKeypad(
+    controller: _amountController,
+  );
 }
 
-/// เคอร์เซอร์กระพริบ (เหมือนเคอร์เซอร์พิมพ์ข้อความ) ใช้แสดงต่อท้ายจำนวนเงิน
-/// ระหว่างที่แป้นตัวเลขเปิดอยู่ ให้ผู้ใช้รู้ว่ากำลังอยู่ในโหมดพิมพ์
-/// (คลาสเดียวกับที่ใช้ในหน้า Add Income/Expense)
 class _BlinkingCursor extends StatefulWidget {
   final Color color;
   final double height;

@@ -1,5 +1,6 @@
 import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'persisted_icons.dart';
 import '../widgets/pastel_artwork.dart';
 
 /// ประเภทของหมวดหมู่ สอดคล้องกับ Entity Category (category_type)
@@ -17,6 +18,16 @@ class CategoryModel {
   /// ถ้าเป็น null หรือโหลดไฟล์ไม่สำเร็จ (เช่น ยังไม่ได้ใส่ไฟล์จริงลง assets)
   /// ตัว CategoryIcon widget จะ fallback กลับไปแสดง [icon] แทนโดยอัตโนมัติ
   final String? imagePath;
+  final int? artworkNumber;
+  final int? colorValue;
+  final List<String> subcategories;
+
+  List<CategoryModel> get childCategories => [
+    for (var i = 0; i < subcategories.length; i++)
+      CategoryModel(id: '$id:sub:$i', name: '$name › ${subcategories[i]}',
+        type: type, icon: icon, imagePath: imagePath,
+        artworkNumber: artworkNumber, colorValue: colorValue),
+  ];
 
   const CategoryModel({
     required this.id,
@@ -25,6 +36,9 @@ class CategoryModel {
     required this.icon,
     this.description,
     this.imagePath,
+    this.artworkNumber,
+    this.colorValue,
+    this.subcategories = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -35,6 +49,9 @@ class CategoryModel {
       'icon_code': icon.codePoint,
       'description': description,
       'image_path': imagePath,
+      'artwork_number': artworkNumber,
+      'color_value': colorValue,
+      'subcategories': subcategories,
     };
   }
 
@@ -44,9 +61,12 @@ class CategoryModel {
       name: map['name'] as String,
       type: map['type'] == 'income' ? CategoryType.income : CategoryType.expense,
       // หมายเหตุ: ไอคอนมาตรฐานของ Icons.* ใช้ fontFamily 'MaterialIcons'
-      icon: IconData(map['icon_code'] as int, fontFamily: 'MaterialIcons'),
+      icon: persistedIconFromCodePoint(map['icon_code'] as int),
       description: map['description'] as String?,
       imagePath: map['image_path'] as String?,
+      artworkNumber: (map['artwork_number'] as num?)?.toInt(),
+      colorValue: (map['color_value'] as num?)?.toInt(),
+      subcategories: List<String>.from(map['subcategories'] as List? ?? const []),
     );
   }
 }
@@ -96,6 +116,9 @@ class CategoryIcon extends StatelessWidget {
     final number = int.tryParse(category.id.replaceFirst('c', ''));
     if (number != null && category.id == 'c${number.toString().padLeft(2, '0')}' && number >= 1 && number <= 55) {
       return PastelArtwork(categoryNumber: number, size: size);
+    }
+    if (category.artworkNumber != null) {
+      return PastelArtwork(categoryNumber: category.artworkNumber!, size: size);
     }
     final path = category.imagePath;
     if (path == null || path.isEmpty) {

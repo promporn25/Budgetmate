@@ -116,7 +116,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -143,7 +143,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     Text(service.t('reset_password_heading'),
                         textAlign: TextAlign.center, style: AppTextStyles.title),
                     const SizedBox(height: 8),
@@ -153,11 +153,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       style: TextStyle(
                           color: AppColors.textSecondary, fontSize: 13.5, height: 1.4),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 20),
 
                     // การ์ดฟอร์มโค้งมนลอยตัว ให้ความรู้สึกนุ่มนวลอบอุ่นกว่าเดิม
                     Container(
-                      padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(AppRadius.md + 8),
@@ -189,14 +189,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             },
                           ),
                           if (_error != null) ...[
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 14),
                             MessageBanner(text: _error!),
                           ],
                           if (_success != null) ...[
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 14),
                             MessageBanner(text: _success!, isError: false),
                           ],
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 18),
                           PrimaryButton(
                             label: service.t('reset_password_heading'),
                             loading: _loading,
@@ -205,7 +205,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
                     Center(
                       child: TextButton(
                         onPressed: _loading ? null : () => Navigator.pop(context),

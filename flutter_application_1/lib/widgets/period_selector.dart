@@ -109,19 +109,21 @@ class PeriodFilterBar extends StatelessWidget {
     final service = context.watch<DataService>();
     final isThai = service.currentLanguage != 'English';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             _periodChip(service.t('period_day'), ChartPeriod.day),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             _periodChip(service.t('period_month'), ChartPeriod.month),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             _periodChip(service.t('period_year'), ChartPeriod.year),
           ],
         ),
-        const SizedBox(height: 10),
         GestureDetector(
           onTap: () {
             switch (period) {
@@ -137,7 +139,7 @@ class PeriodFilterBar extends StatelessWidget {
             }
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -146,9 +148,9 @@ class PeriodFilterBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.textSecondary),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 Text(_label(service),
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5, color: AppColors.textPrimary)),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: AppColors.textPrimary)),
                 const SizedBox(width: 6),
                 Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppColors.textMuted),
               ],
@@ -165,7 +167,7 @@ class PeriodFilterBar extends StatelessWidget {
       onTap: () => onPeriodChanged(value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: selected ? AppColors.accentDeep : AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -174,7 +176,7 @@ class PeriodFilterBar extends StatelessWidget {
             style: TextStyle(
                 color: selected ? Colors.white : AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
-                fontSize: 12.5)),
+                fontSize: 12)),
       ),
     );
   }
@@ -204,9 +206,9 @@ class _PastelDialogFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: AppColors.bg,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -217,7 +219,7 @@ class _PastelDialogFrame extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(title,
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19, color: AppColors.textPrimary)),
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: AppColors.textPrimary)),
                 ),
                 badge,
               ],
@@ -287,7 +289,7 @@ class _PillButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -460,7 +462,7 @@ class _PastelCalendarDialogState extends State<PastelCalendarDialog> {
       title: widget.isThai ? 'เลือกวันที่' : 'Select Date',
       badge: _CalendarBadge(
         child: Text(_selected.day.toString().padLeft(2, '0'),
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.pinnedGoalIcon)),
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.pinnedGoalIcon)),
       ),
       confirmLabel: widget.isThai ? 'ยืนยัน' : 'Confirm',
       onConfirm: () => Navigator.pop(context, _selected),
@@ -637,7 +639,7 @@ class _PastelMonthDialogState extends State<PastelMonthDialog> {
               Expanded(
                 child: Center(
                   child: Text('$_year',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
                 ),
               ),
               _NavArrow(
@@ -727,7 +729,7 @@ class _PastelYearDialogState extends State<PastelYearDialog> {
       title: widget.isThai ? 'เลือกปี' : 'Select Year',
       badge: _CalendarBadge(
         child: Text(_year.toString().substring(2),
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.pinnedGoalIcon)),
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.pinnedGoalIcon)),
       ),
       confirmLabel: widget.isThai ? 'ยืนยัน' : 'Confirm',
       onConfirm: () => Navigator.pop(context, _year),

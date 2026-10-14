@@ -7,6 +7,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'services/data_service.dart';
 import 'screens/loading_screen.dart';
 import 'screens/app_theme.dart' show appFontFamily, AppColors, AppTheme;
+import 'widgets/responsive_scale.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,10 +20,7 @@ Future<void> main() async {
   runApp(const BudgetMateApp());
 }
 
-/// ค่า default ของ Flutter (โดยเฉพาะบน Web/Desktop) จะไม่อนุญาตให้ "ลากด้วยเมาส์"
-/// เพื่อเลื่อนดู ListView ในแนวนอน/แนวตั้งได้ (บนมือถือใช้นิ้วสัมผัสจะเลื่อนได้ปกติอยู่แล้ว)
-/// คลาสนี้เพิ่ม PointerDeviceKind.mouse เข้าไปในอุปกรณ์ที่อนุญาตให้ลาก
-/// เพื่อให้ทุกหน้าที่มี list เลื่อนแนวนอน (เช่น Categories) ลากด้วยเมาส์ได้ด้วย
+/// อนุญาตให้ลากด้วยเมาส์/ทัชแพด/ปากกา เพื่อเลื่อน list ได้ (Web/Desktop)
 class AppScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
@@ -43,18 +41,28 @@ class BudgetMateApp extends StatelessWidget {
       child: Consumer<DataService>(
         builder: (context, service, _) {
           AppColors.brightness = service.themeMode == ThemeMode.dark
-              ? Brightness.dark : Brightness.light;
+              ? Brightness.dark
+              : Brightness.light;
           return MaterialApp(
             title: 'BUDGETMATE',
             debugShowCheckedModeBanner: false,
             scrollBehavior: AppScrollBehavior(),
             themeMode: service.themeMode,
+            // ปรับขนาดทุกหน้าให้พอดีกับความกว้างจอจริง
+            builder: (context, child) => ResponsiveScale(child: child!),
             theme: ThemeData(
               useMaterial3: true,
               colorSchemeSeed: Colors.black,
               brightness: Brightness.light,
               fontFamily: appFontFamily,
               appBarTheme: const AppBarTheme(
+                toolbarHeight: 56,
+                titleTextStyle: TextStyle(
+                  fontFamily: appFontFamily,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
                 elevation: 0,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'persisted_icons.dart';
 
 enum GoalStatus { inProgress, completed }
 
@@ -13,6 +14,8 @@ class GoalModel {
   final DateTime targetDate; // target_date
   GoalStatus status; // status
   final IconData icon;
+  final int? artworkNumber;
+  final bool isPinned;
   final String? note; // หมายเหตุ (optional)
 
   GoalModel({
@@ -26,6 +29,8 @@ class GoalModel {
     required this.icon,
     this.status = GoalStatus.inProgress,
     this.note,
+    this.isPinned = false,
+    this.artworkNumber,
   });
 
   double get progress =>
@@ -42,7 +47,9 @@ class GoalModel {
     DateTime? targetDate,
     GoalStatus? status,
     IconData? icon,
+    int? artworkNumber,
     String? note,
+    bool? isPinned,
   }) {
     return GoalModel(
       id: id,
@@ -54,7 +61,9 @@ class GoalModel {
       targetDate: targetDate ?? this.targetDate,
       status: status ?? this.status,
       icon: icon ?? this.icon,
+      artworkNumber: artworkNumber ?? this.artworkNumber,
       note: note ?? this.note,
+      isPinned: isPinned ?? this.isPinned,
     );
   }
 
@@ -70,7 +79,9 @@ class GoalModel {
       'target_date': targetDate.toIso8601String(),
       'status': status == GoalStatus.completed ? 'completed' : 'inProgress',
       'icon_code': icon.codePoint,
+      'artwork_number': artworkNumber,
       'note': note,
+      'is_pinned': isPinned,
     };
   }
 
@@ -84,8 +95,10 @@ class GoalModel {
       startDate: DateTime.parse(map['start_date'] as String),
       targetDate: DateTime.parse(map['target_date'] as String),
       status: map['status'] == 'completed' ? GoalStatus.completed : GoalStatus.inProgress,
-      icon: IconData(map['icon_code'] as int, fontFamily: 'MaterialIcons'),
+      icon: persistedIconFromCodePoint(map['icon_code'] as int),
       note: map['note'] as String?,
+      isPinned: map['is_pinned'] == true,
+      artworkNumber: (map['artwork_number'] as num?)?.toInt(),
     );
   }
 }

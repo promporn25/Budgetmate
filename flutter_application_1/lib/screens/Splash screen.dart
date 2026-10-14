@@ -52,10 +52,10 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 18),
             Text(
               'BUDGETMATE',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 1, color: AppColors.textPrimary),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 6),
             Text('จัดการเงินของคุณให้เป็นเรื่องง่าย',

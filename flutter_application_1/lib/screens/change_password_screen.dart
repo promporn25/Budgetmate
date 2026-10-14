@@ -1,3 +1,5 @@
+import '../widgets/password_requirements.dart';
+import '../services/password_policy.dart';
 import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +25,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   String? _error;
   String? _success;
 
+  @override
+  void dispose() {
+    _currentCtrl.dispose();
+    _newCtrl.dispose();
+    _confirmCtrl.dispose();
+    super.dispose();
+  }
+
   Future<void> _submit() async {
     if (_loading) return;
     final service = context.read<DataService>();
@@ -33,11 +43,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       });
       return;
     }
-    if (_newCtrl.text.length < 6) {
+    final invalid = passwordValidationKey(_newCtrl.text);
+    if (invalid != null) {
       setState(() {
-        _error = service.t('password_min_length');
+        _error = service.t(invalid);
         _success = null;
       });
+      return;
+    }
+    if (_confirmCtrl.text.isEmpty) {
+      setState(() { _error = service.t('enter_confirm_password'); _success = null; });
       return;
     }
     if (_newCtrl.text != _confirmCtrl.text) {
@@ -54,7 +69,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       _success = null;
     });
 
-    final error = await service.changePassword(_currentCtrl.text, _newCtrl.text);
+    String? error;
+    try { error = await service.changePassword(_currentCtrl.text, _newCtrl.text); }
+    catch (_) { error = service.t('save_failed'); }
 
     if (!mounted) return;
     if (error == null) {
@@ -87,47 +104,51 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const HeaderIconBadge(icon: Icons.shield_outlined),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               _label(service.t('current_password')),
               AppTextField(
                 controller: _currentCtrl,
+                autofillHints: const [AutofillHints.password],
                 hint: service.t('current_password_hint'),
                 icon: Icons.lock_outline_rounded,
                 obscureText: _obscureCurrent,
                 toggleObscure: () => setState(() => _obscureCurrent = !_obscureCurrent),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               _label(service.t('new_password')),
               AppTextField(
                 controller: _newCtrl,
+                            autofillHints: const [AutofillHints.newPassword],
                 hint: service.t('new_password_hint'),
                 icon: Icons.lock_reset_rounded,
                 obscureText: _obscureNew,
                 toggleObscure: () => setState(() => _obscureNew = !_obscureNew),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               _label(service.t('confirm_new_password')),
               AppTextField(
                 controller: _confirmCtrl,
+                            autofillHints: const [AutofillHints.newPassword],
                 hint: service.t('confirm_new_password_hint'),
                 icon: Icons.lock_reset_rounded,
                 obscureText: _obscureConfirm,
                 toggleObscure: () => setState(() => _obscureConfirm = !_obscureConfirm),
               ),
+              PasswordRequirements(password: _newCtrl, confirmation: _confirmCtrl),
               if (_error != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 MessageBanner(text: _error!),
               ],
               if (_success != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 MessageBanner(text: _success!, isError: false),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               PrimaryButton(label: service.t('save_new_password'), loading: _loading, onPressed: _submit),
             ],
           ),

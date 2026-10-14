@@ -103,7 +103,7 @@ class _StatisticScreenState extends State<StatisticScreen> {
               onRefresh: _onRefresh,
               child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(horizontal: AppLayout.pageInset(context), vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -114,22 +114,23 @@ class _StatisticScreenState extends State<StatisticScreen> {
                 Icon(Icons.insights_rounded, size: 15, color: AppColors.accentDeep),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             PeriodFilterBar(
               period: _period,
               anchor: _anchor,
               onPeriodChanged: (p) => setState(() => _period = p),
               onAnchorChanged: (d) => setState(() => _anchor = d),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             AppCard(
-              padding: const EdgeInsets.fromLTRB(12, 16, 16, 12),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
               child: Column(
                 children: [
                   SizedBox(
-                    height: 180,
+                    height: 120,
                     child: LineChart(
                       LineChartData(
+                        minY: 0,
                         gridData: const FlGridData(show: false),
                         borderData: FlBorderData(show: false),
                         titlesData: FlTitlesData(
@@ -142,7 +143,9 @@ class _StatisticScreenState extends State<StatisticScreen> {
                           bottomTitles: AxisTitles(
                             sideTitles: SideTitles(
                               showTitles: true,
+                              interval: 1,
                               getTitlesWidget: (value, meta) {
+                                if (value != value.roundToDouble()) return const SizedBox.shrink();
                                 final idx = value.toInt();
                                 if (idx < 0 || idx >= series.length) {
                                   return const SizedBox.shrink();
@@ -159,6 +162,7 @@ class _StatisticScreenState extends State<StatisticScreen> {
                         lineBarsData: [
                           LineChartBarData(
                             isCurved: true,
+            preventCurveOverShooting: true,
                             color: AppColors.accentDeep,
                             barWidth: 3,
                             dotData: const FlDotData(show: false),
@@ -178,6 +182,7 @@ class _StatisticScreenState extends State<StatisticScreen> {
                           ),
                           LineChartBarData(
                             isCurved: true,
+            preventCurveOverShooting: true,
                             color: AppColors.accentPink,
                             barWidth: 3,
                             dotData: const FlDotData(show: false),
@@ -212,7 +217,7 @@ class _StatisticScreenState extends State<StatisticScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             if (mostSpent != null)
               AppCard(
                 color: AppColors.accentAltBg,
@@ -232,23 +237,25 @@ class _StatisticScreenState extends State<StatisticScreen> {
                               color: const Color(0xFFC79A3B).withOpacity(0.14), shape: BoxShape.circle),
                         ),
                       ),
-                      Row(
+                      LayoutBuilder(builder: (context, constraints) => Wrap(
+                        spacing: 10, runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Container(
-                            width: 42,
-                            height: 42,
+                            width: 34,
+                            height: 34,
                             decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                            child: CategoryIcon(category: mostSpent.key, color: AppColors.accentDeep),
+                            child: CategoryIcon(category: mostSpent.key, size: 22, color: AppColors.accentDeep),
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
+                          SizedBox(
+                            width: (constraints.maxWidth - 44).clamp(0.0, double.infinity),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [
-                                    Text(service.t('most_spent_category'),
-                                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                                    Flexible(child: Text(service.t('most_spent_category'),
+                                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12))),
                                     const SizedBox(width: 4),
                                     const Text('🏆', style: TextStyle(fontSize: 11)),
                                   ],
@@ -256,7 +263,7 @@ class _StatisticScreenState extends State<StatisticScreen> {
                                 const SizedBox(height: 2),
                                 Text(service.categoryName(mostSpent.key),
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
+                                        fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
                               ],
                             ),
                           ),
@@ -270,12 +277,12 @@ class _StatisticScreenState extends State<StatisticScreen> {
                                 style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                           ),
                         ],
-                      ),
+                      )),
                     ],
                   ),
                 ),
               ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 14),
             Row(
               children: [
                 Text(service.t('goal_saving'), style: AppTextStyles.heading),
@@ -283,9 +290,9 @@ class _StatisticScreenState extends State<StatisticScreen> {
                 const Text('🐷', style: TextStyle(fontSize: 14)),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             if (service.goals.isNotEmpty) _FeaturedGoalCard(goal: _topGoal(service)!, service: service),
-            if (service.goals.isNotEmpty) const SizedBox(height: 16),
+            if (service.goals.isNotEmpty) const SizedBox(height: 12),
             if (service.goals.isEmpty)
               EmptyState(icon: Icons.savings_outlined, text: service.t('no_goals'))
             else
@@ -295,21 +302,21 @@ class _StatisticScreenState extends State<StatisticScreen> {
                 final tint = _statGoalTint[i % _statGoalTint.length];
                 final tintIcon = _statGoalTintIcon[i % _statGoalTintIcon.length];
                 return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: 10),
                     child: AppCard(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(5),
                                 decoration: BoxDecoration(
                                   color: tint,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: GoalArtwork(g.icon, color: tintIcon, size: 18),
+                                child: GoalArtwork(g.icon, artworkNumber: g.artworkNumber, color: tintIcon, size: 16),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -325,7 +332,7 @@ class _StatisticScreenState extends State<StatisticScreen> {
                             borderRadius: BorderRadius.circular(8),
                             child: LinearProgressIndicator(
                               value: g.progress,
-                              minHeight: 9,
+                              minHeight: 7,
                               backgroundColor: AppColors.border,
                               color: g.progress >= 1 ? AppColors.success : tintIcon,
                             ),
@@ -371,7 +378,7 @@ class _StatisticScreenState extends State<StatisticScreen> {
 
   Widget _legendChip(Color color, Color bg, String label, bool isIncome) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -401,14 +408,14 @@ class _FeaturedGoalCard extends StatelessWidget {
     final pct = (goal.progress * 100).clamp(0, 100).toStringAsFixed(0);
     final near = goal.isNearTarget as bool;
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 18, 12, 18),
+      // Clip decorations at the card edge, not at the padded text bounds.
+      clipBehavior: Clip.antiAlias,
+      padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
       decoration: BoxDecoration(
         color: AppColors.successBg,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Stack(
+      child: Stack(
           clipBehavior: Clip.none,
           children: [
             // ฟองสบู่ตกแต่งมุมล่างซ้าย ให้เข้าชุดกับการ์ดอื่นๆ ในแอป
@@ -429,15 +436,15 @@ class _FeaturedGoalCard extends StatelessWidget {
             child: Opacity(
               opacity: 0.9,
               child: Container(
-                width: 46,
-                height: 46,
+                width: 36,
+                height: 36,
                 decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                child: Icon(Icons.favorite_rounded, color: AppColors.accentPink, size: 22),
+                child: Icon(Icons.favorite_rounded, color: AppColors.accentPink, size: 18),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 46),
+            padding: const EdgeInsets.only(right: 40),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -456,7 +463,7 @@ class _FeaturedGoalCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
@@ -464,7 +471,7 @@ class _FeaturedGoalCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                         child: LinearProgressIndicator(
                           value: goal.progress,
-                          minHeight: 10,
+                          minHeight: 8,
                           backgroundColor: Colors.white,
                           color: AppColors.accentDeep,
                         ),
@@ -472,7 +479,7 @@ class _FeaturedGoalCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Text('$pct%',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
                   ],
                 ),
               ],
@@ -480,7 +487,6 @@ class _FeaturedGoalCard extends StatelessWidget {
           ),
           ],
         ),
-      ),
     );
   }
 }

@@ -38,7 +38,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 _filterChip(service.t('filter_all'), _showAll, () => setState(() => _showAll = true)),
@@ -65,7 +65,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     )
                   : ListView.separated(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       itemCount: list.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
@@ -91,7 +91,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
         decoration: BoxDecoration(
           color: selected ? AppColors.accentDeep : AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -116,7 +116,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
+        padding: const EdgeInsets.only(right: 16),
         child: Icon(Icons.delete_outline_rounded, color: AppColors.danger),
       ),
       confirmDismiss: (_) async {
@@ -130,7 +130,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     }
                   },
       child: AppCard(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           leading: CircleAvatar(

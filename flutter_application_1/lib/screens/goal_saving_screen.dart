@@ -1,3 +1,4 @@
+import '../widgets/amount_keypad.dart';
 import '../widgets/pastel_artwork.dart';
 import '../widgets/data_action.dart';
 import 'package:budgetmate/screens/app_theme.dart';
@@ -41,148 +42,114 @@ class GoalSavingScreen extends StatelessWidget {
         backgroundColor: AppColors.bg,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(service.t('goal_saving'),
-                style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-            const SizedBox(width: 6),
-            const Text('', style: TextStyle(fontSize: 16)),
-          ],
-        ),
+        title: Text(service.t('goal_saving'),
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
       ),
-      // ห่อด้วย RefreshIndicator กันไม่ให้ดึงหน้าจอเกินขอบบนแล้วเห็นพื้นที่ว่างสีขาว
-      body: RefreshIndicator(
-        color: AppColors.accentDeep,
-        backgroundColor: AppColors.card,
-        onRefresh: () async {
-          await refreshAppData(context);
-        },
-        child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.accentDeep, AppColors.accent],
-              ),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accentDeep.withOpacity(0.28),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
+      body: SafeArea(
+        top: false,
+        child: RefreshIndicator(
+          color: AppColors.accentDeep,
+          backgroundColor: AppColors.card,
+          onRefresh: () async {
+            await refreshAppData(context);
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.symmetric(horizontal: AppLayout.pageInset(context), vertical: 12),
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.accentDeep, AppColors.accent],
+                  ),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accentDeep.withOpacity(0.28),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    right: -20,
-                    top: -26,
-                    child: Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.12), shape: BoxShape.circle),
-                    ),
-                  ),
-                  Positioned(
-                    right: 30,
-                    bottom: -30,
-                    child: Container(
-                      width: 54,
-                      height: 54,
-                      decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10), shape: BoxShape.circle),
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  child: Stack(
+                    clipBehavior: Clip.none,
                     children: [
-                      Row(
+                      Positioned(
+                        right: -20,
+                        top: -26,
+                        child: Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.12), shape: BoxShape.circle),
+                        ),
+                      ),
+                      Positioned(
+                        right: 30,
+                        bottom: -30,
+                        child: Container(
+                          width: 54,
+                          height: 54,
+                          decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.10), shape: BoxShape.circle),
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(Icons.account_balance_wallet_rounded,
-                                color: AppColors.accentDeep, size: 18),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.account_balance_wallet_rounded,
+                                    color: AppColors.accentDeep, size: 18),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(service.t('ledger_balance'),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white70)),
+                            ],
                           ),
-                          const SizedBox(width: 10),
-                          Text(service.t('ledger_balance'),
+                          const SizedBox(height: 10),
+                          Text(service.formatMoney(service.balance),
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white70)),
+                                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Text(service.formatMoney(service.balance),
-                          style: const TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(height: 16),
+              if (service.goals.isEmpty)
+                EmptyState(icon: Icons.savings_outlined, text: service.t('no_goals'))
+              else
+                LayoutBuilder(builder: (context, constraints) {
+                  final cardWidth = (constraints.maxWidth - 12) / 2;
+                  return Wrap(spacing: 12, runSpacing: 12, children: [
+                    for (var i = 0; i < service.goals.length; i++)
+                      SizedBox(width: cardWidth, child: _GoalCard(
+                        goal: service.goals[i],
+                        tint: _goalTint[i % _goalTint.length],
+                        tintDeep: _goalTintDeep[i % _goalTintDeep.length],
+                        onTap: () => _showDepositDialog(context, service.goals[i]),
+                      )),
+                  ]);
+                }),
+              const SizedBox(height: 80),
+            ],
           ),
-          const SizedBox(height: 20),
-          if (service.goals.isEmpty)
-            EmptyState(icon: Icons.savings_outlined, text: service.t('no_goals'))
-          else
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.4,
-              ),
-              itemCount: service.goals.length,
-              itemBuilder: (context, i) {
-                final g = service.goals[i];
-                return Dismissible(
-                  key: ValueKey(g.id),
-                  confirmDismiss: (_) async {
-                    try {
-                      await service.deleteGoal(g.id);
-                      return true;
-                    } catch (e) {
-                      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${service.t('save_failed')}: $e')));
-                      return false;
-                    }
-                  },
-                  background: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.dangerBg,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                    ),
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
-                    child: Icon(Icons.delete_outline_rounded, color: AppColors.danger),
-                  ),
-                  child: _GoalCard(
-                    goal: g,
-                    tint: _goalTint[i % _goalTint.length],
-                    tintDeep: _goalTintDeep[i % _goalTintDeep.length],
-                    onTap: () => _showDepositDialog(context, g),
-                  ),
-                );
-              },
-            ),
-          const SizedBox(height: 80),
-        ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -213,10 +180,11 @@ class _GoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final completed = goal.status == GoalStatus.completed;
+    final service = context.watch<DataService>();
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        constraints: const BoxConstraints(minHeight: 136),
         decoration: BoxDecoration(
           color: tint,
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -243,35 +211,148 @@ class _GoalCard extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(8),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(7),
+                          padding: const EdgeInsets.all(5),
                           decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                          child: GoalArtwork(goal.icon, color: tintDeep, size: 17),
+                          child: GoalArtwork(goal.icon, artworkNumber: goal.artworkNumber, color: tintDeep, size: 15),
                         ),
                         const Spacer(),
-                        if (completed)
-                          Icon(Icons.check_circle_rounded, color: AppColors.success, size: 18)
-                        else if (goal.isNearTarget)
-                          Icon(Icons.star_rounded, color: tintDeep.withOpacity(0.8), size: 18)
-                        else
-                          Icon(Icons.add_circle_outline_rounded, color: tintDeep, size: 18),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                          tooltip: service.t(goal.isPinned ? 'unpin_goal' : 'pin_goal'),
+                          icon: Icon(goal.isPinned ? Icons.push_pin_rounded : Icons.add_circle_outline_rounded,
+                            color: tintDeep, size: 18),
+                          onPressed: () async {
+                            try { await service.setGoalPinned(goal.id, !goal.isPinned); }
+                            catch (_) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(service.t('save_failed')))); }
+                          },
+                        ),
+                        PopupMenuButton<String>(
+                          tooltip: service.t('manage_goal'),
+                          padding: EdgeInsets.zero,
+                          iconSize: 18,
+                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                          iconColor: tintDeep,
+                          color: AppColors.card,
+                          surfaceTintColor: Colors.transparent,
+                          shadowColor: AppColors.shadow,
+                          elevation: 4,
+                          position: PopupMenuPosition.under,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                            side: BorderSide(color: AppColors.border),
+                          ),
+                          onSelected: (action) async {
+                            if (action == 'edit') {
+                              await Navigator.push(context, noAnimationRoute(AddGoalSavingScreen(goal: goal)));
+                            } else {
+                              final confirmed = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(
+                                backgroundColor: AppColors.card,
+                                surfaceTintColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                                  side: BorderSide(color: AppColors.border),
+                                ),
+                                titleTextStyle: AppTextStyles.heading,
+                                contentTextStyle: AppTextStyles.caption.copyWith(
+                                  fontSize: 14, height: 1.6, color: AppColors.textPrimary),
+                                actionsPadding: const EdgeInsets.fromLTRB(18, 8, 18, 16),
+                                title: Text(service.t('delete_goal_confirm')),
+                                content: Text('${goal.name}\n${service.t('delete_goal_notice')}'),
+                                actions: [
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.ink,
+                                      backgroundColor: AppColors.accentBg,
+                                      minimumSize: const Size(88, 44),
+                                      textStyle: AppTextStyles.label,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
+                                    ),
+                                    onPressed: () => Navigator.pop(ctx, false),
+                                    child: Text(service.t('cancel'))),
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.danger,
+                                      backgroundColor: AppColors.dangerBg,
+                                      minimumSize: const Size(88, 44),
+                                      textStyle: AppTextStyles.label,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
+                                    ),
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    child: Text(service.t('delete'))),
+                                ],
+                              ));
+                              if (confirmed != true || !context.mounted) return;
+                              try { await service.deleteGoal(goal.id); }
+                              catch (_) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(service.t('save_failed')))); }
+                            }
+                          },
+                          itemBuilder: (_) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Row(children: [
+                                Container(
+                                  padding: const EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accentBg,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(Icons.edit_rounded, size: 18, color: AppColors.ink),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(service.t('edit'), style: AppTextStyles.label),
+                              ]),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Row(children: [
+                                Container(
+                                  padding: const EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.dangerBg,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.danger),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(service.t('delete'),
+                                  style: AppTextStyles.label.copyWith(color: AppColors.danger)),
+                              ]),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(goal.name,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.textPrimary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
-                    const Spacer(),
-                    Text('${context.watch<DataService>().formatMoney(goal.savedAmount)} / ${context.watch<DataService>().formatMoney(goal.targetAmount)}',
-                        style: TextStyle(fontSize: 12.5, color: AppColors.textPrimary)),
-                    const SizedBox(height: 8),
+                    if (goal.note?.trim().isNotEmpty == true) ...[
+                      const SizedBox(height: 4),
+                      Text(goal.note!.trim(),
+                            key: ValueKey('goal-note-${goal.id}'),
+                            style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis),
+                    ],
+                    const SizedBox(height: 6),
+                    Wrap(children: [
+                      Text('${service.formatMoney(goal.savedAmount)} / ',
+                        style: TextStyle(fontSize: 11.5, color: AppColors.textPrimary)),
+                      Text(service.formatMoney(goal.targetAmount),
+                        style: TextStyle(fontSize: 11.5, color: AppColors.textPrimary)),
+                    ]),
+                    const SizedBox(height: 6),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                       child: LinearProgressIndicator(
@@ -302,6 +383,7 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
   await showDialog(
     context: context,
     barrierColor: Colors.black.withOpacity(0.5),
+    barrierDismissible: false,
     builder: (dialogContext) {
       bool submitting = false;
       String? errorText;
@@ -318,8 +400,9 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
           }
 
           Future<void> submit() async {
-            final amount = double.tryParse(controller.text.trim()) ?? 0;
-            if (amount <= 0) {
+            if (submitting) return;
+            final amount = double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0;
+            if (!amount.isFinite || amount <= 0) {
               setState(() => errorText = service.t('enter_valid_amount'));
               return;
             }
@@ -327,7 +410,10 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
               submitting = true;
               errorText = null;
             });
-            final error = await service.transferToGoal(goal.id, amount);
+            String? error;
+            try { error = await service.transferToGoal(goal.id, amount); }
+            catch (_) { error = service.t('save_failed'); }
+            if (!dialogContext.mounted) return;
             if (error != null) {
               setState(() {
                 submitting = false;
@@ -338,9 +424,9 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
             if (dialogContext.mounted) Navigator.pop(dialogContext);
           }
 
-          return Dialog(
+          return PopScope(canPop: !submitting, child: Dialog(
             backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+            insetPadding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.bg,
@@ -353,12 +439,12 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                   ),
                 ],
               ),
-              child: Column(
+              child: SingleChildScrollView(child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -388,7 +474,7 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                                   ),
                                 ],
                               ),
-                              child: GoalArtwork(goal.icon, color: AppColors.accentDeep, size: 25),
+                              child: GoalArtwork(goal.icon, artworkNumber: goal.artworkNumber, color: AppColors.accentDeep, size: 25),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
@@ -401,7 +487,7 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                                   const SizedBox(height: 2),
                                   Text(goal.name,
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.bold, fontSize: 17, color: Colors.white),
+                                          fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis),
                                 ],
@@ -420,7 +506,7 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(AppRadius.pill),
                           child: LinearProgressIndicator(
@@ -434,10 +520,11 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
+                            Expanded(child: Text(
                                 '${context.watch<DataService>().formatMoney(goal.savedAmount)} / ${context.watch<DataService>().formatMoney(goal.targetAmount)}',
                                 style: const TextStyle(
-                                    color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                                    color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600))),
+                            const SizedBox(width: 8),
                             Text('${(goal.progress * 100).toStringAsFixed(0)}%',
                                 style: const TextStyle(
                                     color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
@@ -447,10 +534,19 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (goal.note?.trim().isNotEmpty == true) ...[
+                          Text(service.currentLanguage == 'English' ? 'Note' : 'หมายเหตุ',
+                            style: AppTextStyles.label),
+                          const SizedBox(height: 6),
+                          Text(goal.note!.trim(),
+                            key: const Key('goal-note-detail'),
+                            style: TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                          const SizedBox(height: 14),
+                        ],
                         Row(
                           children: [
                             Expanded(
@@ -474,26 +570,33 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 14),
                         Text(service.t('deposit_title'),
                             style: AppTextStyles.label.copyWith(color: AppColors.textSecondary)),
                         const SizedBox(height: 8),
                         AppTextField(
                           controller: controller,
                           hint: '0.00',
-                          autofocus: true,
+                          readOnly: true,
+                          onTap: submitting ? null : () async {
+                            await showAmountKeypad(dialogContext,
+                              controller: controller,
+                              title: service.t('deposit_title'));
+                            if (dialogContext.mounted) setState(() => errorText = null);
+                          },
                           prefixText: '${service.currentCurrency} ',
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink),
+                          keyboardType: TextInputType.none,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                            TextInputFormatter.withFunction((oldValue, newValue) =>
+                              RegExp(r'^\d*\.?\d{0,2}$').hasMatch(newValue.text) ? newValue : oldValue),
                           ],
                           errorText: errorText,
                           onChanged: (_) {
                             if (errorText != null) setState(() => errorText = null);
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
@@ -518,19 +621,19 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                                 children: [
                                   Icon(Icons.info_outline_rounded, size: 15, color: AppColors.danger),
                                   const SizedBox(width: 6),
-                                  Text(service.t('insufficient_balance'),
-                                      style: TextStyle(color: AppColors.danger, fontSize: 12.5)),
+                                  Expanded(child: Text(service.t('insufficient_balance'),
+                                      style: TextStyle(color: AppColors.danger, fontSize: 12.5))),
                                 ],
                               ),
                           ],
                         ),
-                        const SizedBox(height: 22),
+                        const SizedBox(height: 16),
                         Row(
                           children: [
                             Expanded(
                               child: OutlinedButton(
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
                                   side: BorderSide(color: AppColors.border, width: 1.3),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(AppRadius.pill)),
@@ -561,7 +664,7 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                                   style: FilledButton.styleFrom(
                                     backgroundColor: Colors.transparent,
                                     shadowColor: Colors.transparent,
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(AppRadius.pill)),
                                   ),
@@ -590,9 +693,9 @@ Future<void> _showDepositDialog(BuildContext context, GoalModel goal) async {
                     ),
                   ),
                 ],
-              ),
+              )),
             ),
-          );
+          ));
         },
       );
     },
@@ -618,7 +721,7 @@ class _InfoStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -667,7 +770,7 @@ class _QuickAmountChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.pill),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

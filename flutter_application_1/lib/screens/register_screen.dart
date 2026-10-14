@@ -1,3 +1,5 @@
+import '../widgets/password_requirements.dart';
+import '../services/password_policy.dart';
 import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,16 +24,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePass = true;
   bool _obscureConfirm = true;
 
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    _confirmCtrl.dispose();
+    super.dispose();
+  }
+
   Future<void> _handleRegister() async {
     if (_loading) return;
     final service = context.read<DataService>();
 
+    if (_nameCtrl.text.trim().isEmpty || _emailCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) {
+      setState(() => _error = service.t('fill_all_fields'));
+      return;
+    }
+    if (_confirmCtrl.text.isEmpty) {
+      setState(() => _error = service.t('enter_confirm_password'));
+      return;
+    }
     if (_passCtrl.text != _confirmCtrl.text) {
       setState(() => _error = service.t('password_mismatch'));
       return;
     }
-    if (_nameCtrl.text.isEmpty || _emailCtrl.text.isEmpty || _passCtrl.text.isEmpty) {
-      setState(() => _error = service.t('fill_all_fields'));
+
+    final invalid = passwordValidationKey(_passCtrl.text);
+    if (invalid != null) {
+      setState(() => _error = service.t(invalid));
       return;
     }
 
@@ -127,7 +148,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -153,7 +174,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     Text(service.t('create_account'),
                         textAlign: TextAlign.center,
                         style: AppTextStyles.title),
@@ -165,7 +186,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     // การ์ดฟอร์มโค้งมนลอยตัว ให้ความรู้สึกนุ่มนวลอบอุ่นกว่าเดิม
                     Container(
-                      padding: const EdgeInsets.fromLTRB(20, 22, 20, 22),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
                         borderRadius: BorderRadius.circular(AppRadius.md + 8),
@@ -189,41 +210,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             onLoginTap: _goToLogin,
                             onRegisterTap: () {},
                           ),
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 16),
                           AppTextField(
                             controller: _nameCtrl,
                             hint: service.t('name_hint'),
                             icon: Icons.person_outline_rounded,
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 12),
                           AppTextField(
                             controller: _emailCtrl,
                             hint: service.t('email_hint'),
                             icon: Icons.mail_outline_rounded,
                             keyboardType: TextInputType.emailAddress,
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 12),
                           AppTextField(
                             controller: _passCtrl,
+                            autofillHints: const [AutofillHints.newPassword],
                             hint: service.t('password_hint'),
                             icon: Icons.lock_outline_rounded,
                             obscureText: _obscurePass,
                             toggleObscure: () => setState(() => _obscurePass = !_obscurePass),
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 12),
                           AppTextField(
                             controller: _confirmCtrl,
+                            autofillHints: const [AutofillHints.newPassword],
                             hint: service.t('confirm_password_hint'),
                             icon: Icons.lock_outline_rounded,
                             obscureText: _obscureConfirm,
                             toggleObscure: () =>
                                 setState(() => _obscureConfirm = !_obscureConfirm),
                           ),
+              PasswordRequirements(password: _passCtrl, confirmation: _confirmCtrl),
                           if (_error != null) ...[
-                            const SizedBox(height: 14),
+                            const SizedBox(height: 12),
                             MessageBanner(text: _error!),
                           ],
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 16),
                           PrimaryButton(
                             label: service.t('sign_up'),
                             loading: _loading,
@@ -232,7 +256,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),

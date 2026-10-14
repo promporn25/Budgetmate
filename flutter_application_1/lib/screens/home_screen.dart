@@ -1,3 +1,5 @@
+import '../models/goal_model.dart';
+import 'add_goal_saving_screen.dart';
 import '../widgets/pastel_artwork.dart';
 import '../widgets/data_action.dart';
 import 'package:budgetmate/screens/app_theme.dart';
@@ -90,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final service = context.watch<DataService>();
+    final homeGoals = service.pinnedGoals;
     final series = _incomeExpenseSeries(service);
     final maxVal = series
         .expand((e) => [e.income, e.expense])
@@ -119,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              padding: EdgeInsets.fromLTRB(AppLayout.pageInset(context), 12, AppLayout.pageInset(context), 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -130,16 +133,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icon(Icons.show_chart_rounded, size: 15, color: AppColors.accentDeep),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   PeriodFilterBar(
                     period: _period,
                     anchor: _anchor,
                     onPeriodChanged: (p) => setState(() => _period = p),
                     onAnchorChanged: (d) => setState(() => _anchor = d),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   AppCard(
-                    padding: const EdgeInsets.fromLTRB(12, 16, 16, 8),
+                    padding: const EdgeInsets.fromLTRB(10, 12, 12, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -165,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 8),
                         ],
                         SizedBox(
-                          height: 190,
+                          height: AppLayout.chartHeight(context),
                           child: maxVal == 0
                               ? Center(
                                   child: Column(
@@ -173,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     children: [
                                       CuteMascot(
                                           kind: CuteMascotKind.income,
-                                          size: 34,
+                                          size: 30,
                                           color: AppColors.accent),
                                       const SizedBox(height: 10),
                                       Text(
@@ -227,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         end: Alignment.topCenter,
                                         colors: [_incomeColorDeep, _incomeColorLight],
                                       ),
-                                      width: 9,
+                                      width: 12,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     BarChartRodData(
@@ -237,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         end: Alignment.topCenter,
                                         colors: [_expenseColorDeep, _expenseColorLight],
                                       ),
-                                      width: 9,
+                                      width: 12,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   ],
@@ -249,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 14),
 
                   // ===== ปุ่มกระเป๋าตัง / กระปุกออมสิน =====
                   Row(
@@ -257,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: _ActionButton(
                           icon: Icons.account_balance_wallet_rounded,
-                          artwork: const PastelArtwork(categoryNumber: 14, size: 48),
+                          artwork: const PastelArtwork(categoryNumber: 14, size: 26),
                           label: service.t('wallet_title'),
                           iconBg: AppColors.accentDeep,
                           cardBg: AppColors.accentBg,
@@ -271,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: _ActionButton(
                           icon: Icons.savings_rounded,
-                          artwork: const PastelArtwork(categoryNumber: 17, size: 48),
+                          artwork: const PastelArtwork(categoryNumber: 17, size: 26),
                           label: service.t('goal_saving'),
                           iconBg: AppColors.accentPink,
                           cardBg: AppColors.accentAltBg,
@@ -283,74 +286,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 18),
 
-                  Row(
-                    children: [
-                      Text(service.t('exchange_rate'), style: AppTextStyles.heading),
-                      const SizedBox(width: 6),
-                      Icon(Icons.currency_exchange_rounded, size: 14, color: AppColors.accentDeep),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppColors.accentBg, AppColors.surfaceAlt],
-                      ),
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      boxShadow: [
-                        BoxShadow(color: AppColors.shadow, blurRadius: 16, offset: const Offset(0, 6)),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Positioned(
-                            right: -12,
-                            bottom: -16,
-                            child: Container(
-                              width: 42,
-                              height: 42,
-                              decoration: BoxDecoration(
-                                color: AppColors.accentDeep.withOpacity(0.08),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Row(
-                              children: [
-                                const Text('🇺🇸', style: TextStyle(fontSize: 22)),
-                                const SizedBox(width: 8),
-                                Text('USD', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                                const Spacer(),
-                                Text('${service.t('buy')} 31.55', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
-                                const SizedBox(width: 12),
-                                Text('${service.t('sell')} 31.75', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  if (service.goals.isNotEmpty) ...[
+                  ...[
                     Row(
                       children: [
-                        Text('Pinned Goals', style: AppTextStyles.heading),
-                        const SizedBox(width: 6),
-                        Icon(Icons.push_pin_rounded, size: 15, color: AppColors.accentPink),
-                        const Spacer(),
+                        Expanded(
+                          child: Row(children: [
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(service.t('goal_saving'),
+                                    style: AppTextStyles.heading, maxLines: 1, softWrap: false),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Icon(Icons.push_pin_rounded, size: 15, color: AppColors.accentPink),
+                          ]),
+                        ),
+                        const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () => Navigator.push(
                               context, noAnimationRoute(const GoalSavingScreen())),
@@ -378,25 +333,79 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: List.generate(
-                        service.goals.length > 2 ? 2 : service.goals.length,
-                        (i) => Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(right: i == 0 && service.goals.length > 1 ? 12 : 0),
-                            child: _PinnedGoalCard(
-                              goal: service.goals[i],
-                              bg: AppColors.pinnedGoalBg[i % AppColors.pinnedGoalBg.length],
-                              onTap: () => Navigator.push(context,
-                                  noAnimationRoute(const GoalSavingScreen())),
-                            ),
-                          ),
+                    const SizedBox(height: 10),
+                    if (homeGoals.isEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.card,
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                          border: Border.all(color: AppColors.border),
                         ),
-                      ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: AppColors.accentBg,
+                                borderRadius: BorderRadius.circular(AppRadius.md),
+                              ),
+                              child: Icon(Icons.push_pin_outlined,
+                                size: 23, color: AppColors.ink),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                OutlinedButton.icon(
+                                  key: Key(service.goals.isEmpty
+                                    ? 'home-add-goal' : 'home-pin-goal'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: AppColors.ink,
+                                    backgroundColor: AppColors.accentBg,
+                                    side: BorderSide.none,
+                                    minimumSize: const Size(0, 44),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                    textStyle: AppTextStyles.label,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(AppRadius.sm)),
+                                  ),
+                                  onPressed: () => Navigator.push(context,
+                                    noAnimationRoute(service.goals.isEmpty
+                                      ? const AddGoalSavingScreen()
+                                      : const GoalSavingScreen())),
+                                  icon: Icon(service.goals.isEmpty
+                                    ? Icons.add_rounded : Icons.push_pin_outlined, size: 17),
+                                  label: Text(service.currentLanguage != 'English'
+                                    ? (service.goals.isEmpty ? 'สร้างเป้าหมาย' : 'เลือกเป้าหมาย')
+                                    : (service.goals.isEmpty ? 'Create a goal' : 'Choose a goal')),
+                                ),
+                              ],
+                            )),
+                          ],
+                        ),
+                      )
+                    else Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: List.generate(homeGoals.length, (i) => SizedBox(
+                        width: (MediaQuery.sizeOf(context).width - AppLayout.pageInset(context) * 2 - 12) / 2,
+                        child: _PinnedGoalCard(
+                          goal: homeGoals[i],
+                          bg: AppColors.pinnedGoalBg[i % AppColors.pinnedGoalBg.length],
+                          onTap: () => Navigator.push(context, noAnimationRoute(const GoalSavingScreen())),
+                        ),
+                      )),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                   ],
+                  const SizedBox(height: 10),
+
+
+
                 ],
               ),
             ),
@@ -473,7 +482,7 @@ class _SkyHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 14, 20, 30),
+      padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 4, 16, 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -512,11 +521,11 @@ class _SkyHeader extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                radius: 24,
+                radius: 18,
                 backgroundColor: Colors.white,
                 backgroundImage: avatarImage,
                 child: avatarImage == null
-                    ? Icon(Icons.person, color: AppColors.accentDeep, size: 24)
+                    ? Icon(Icons.person, color: AppColors.accentDeep, size: 22)
                     : null,
               ),
               const SizedBox(width: 12),
@@ -524,10 +533,13 @@ class _SkyHeader extends StatelessWidget {
                 child: Text(
                   '${service.t('greeting')}, ${service.currentUser?.name ?? service.t('default_user')} 👋',
                   style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 17, color: Color(0xFF3D568F)),
+                      fontWeight: FontWeight.w700, fontSize: 16, color: Color(0xFF3D568F)),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              // Reserve room for the sky decoration instead of painting over names.
+              const SizedBox(width: 42),
               GestureDetector(
                 onTap: () => Navigator.push(
                     context, noAnimationRoute(const HistoryScreen())),
@@ -605,7 +617,7 @@ class _ActionButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Container(
-          constraints: const BoxConstraints(minHeight: 64),
+          constraints: const BoxConstraints(minHeight: 50),
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(18),
@@ -633,13 +645,16 @@ class _ActionButton extends StatelessWidget {
                         BoxDecoration(color: iconBg.withOpacity(0.14), shape: BoxShape.circle),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 50),
+                  child: Center(
+                    child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                   child: Row(
                     children: [
                       artwork ?? Container(
-                        width: 40,
-                        height: 40,
+                        width: 32,
+                        height: 32,
                         decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                         child: Icon(icon, size: 20, color: iconBg),
                       ),
@@ -649,7 +664,7 @@ class _ActionButton extends StatelessWidget {
                           label,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            fontSize: 14,
+                            fontSize: 12.5,
                             color: AppColors.textPrimary,
                           ),
                           maxLines: 2,
@@ -657,6 +672,8 @@ class _ActionButton extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                    ),
                   ),
                 ),
               ],
@@ -670,7 +687,7 @@ class _ActionButton extends StatelessWidget {
 
 /// การ์ดเป้าหมายการออมแบบพาสเทล ใช้กับส่วน "Pinned Goals" ในหน้า Home
 class _PinnedGoalCard extends StatelessWidget {
-  final dynamic goal; // GoalModel
+  final GoalModel goal;
   final Color bg;
   final VoidCallback onTap;
   const _PinnedGoalCard({required this.goal, required this.bg, required this.onTap});
@@ -678,11 +695,11 @@ class _PinnedGoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final service = context.watch<DataService>();
-    final bool near = goal.isNearTarget as bool;
+    final bool near = goal.isNearTarget;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(AppRadius.lg)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -690,29 +707,29 @@ class _PinnedGoalCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: GoalArtwork(goal.icon, size: 16, color: AppColors.pinnedGoalIcon),
+                  child: GoalArtwork(goal.icon, artworkNumber: goal.artworkNumber, size: 14, color: AppColors.pinnedGoalIcon),
                 ),
                 const Spacer(),
                 if (near)
                   Icon(Icons.star_rounded, size: 18, color: Colors.white.withOpacity(0.9)),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             Text(goal.name,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5, color: Color(0xFF3D568F)),
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Color(0xFF3D568F)),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis),
             const SizedBox(height: 4),
             Text(service.formatMoney(goal.targetAmount),
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Color(0xFF6E7FA3))),
-            const SizedBox(height: 10),
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11, color: Color(0xFF6E7FA3))),
+            const SizedBox(height: 6),
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.pill),
               child: LinearProgressIndicator(
-                value: goal.progress as double,
-                minHeight: 6,
+                value: goal.progress,
+                minHeight: 5,
                 backgroundColor: Colors.white.withOpacity(0.6),
                 color: AppColors.accentDeep,
               ),

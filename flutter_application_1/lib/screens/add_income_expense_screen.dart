@@ -1,5 +1,7 @@
+import '../widgets/success_notice.dart';
+import '../widgets/category_editor_sheet.dart';
+import '../widgets/amount_keypad.dart';
 import 'receipt_scan_screen.dart';
-import '../widgets/pastel_artwork.dart';
 import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,27 +11,6 @@ import '../services/data_service.dart';
 import '../widgets/bottom_nav.dart';
 import 'home_screen.dart';
 import 'income_expense_screen.dart';
-
-const List<IconData> _customCategoryIcons = [
-  Icons.category_outlined, Icons.restaurant, Icons.local_cafe, Icons.home,
-  Icons.directions_car, Icons.receipt_long, Icons.shopping_bag, Icons.card_giftcard,
-  Icons.flight, Icons.spa, Icons.music_note, Icons.sports_soccer, Icons.pets,
-  Icons.school, Icons.payments, Icons.trending_up, Icons.card_membership,
-  Icons.savings, Icons.fastfood, Icons.local_hospital, Icons.build,
-  Icons.pets_outlined, Icons.celebration, Icons.wifi, Icons.subscriptions,
-];
-
-// สีของ "ไอคอน" หมวดหมู่ (พื้นหลังกล่องไอคอนเป็นสีขาวล้วนเสมอ ใช้ชุดสีนี้แค่ทาสีตัวไอคอนเท่านั้น)
-const List<Color> _categoryTintIcon = [
-  Color(0xFF6FA3D6),
-  Color(0xFFD9789B),
-  Color(0xFFC79A3B),
-  Color(0xFF8C79C9),
-  Color(0xFF54A57E),
-  Color(0xFFDB8A55),
-  Color(0xFF4FA79C),
-  Color(0xFFB1699F),
-];
 
 /// หน้า Add Income/Expense (3.4.10) — ปรับดีไซน์ให้ดูนุ่มนวล มีมิติ และน่ารักขึ้น
 /// (โทนพาสเทลเดิม, ฟังก์ชันเดิมทั้งหมดไม่เปลี่ยนแปลง)
@@ -41,14 +22,15 @@ const List<Color> _categoryTintIcon = [
 /// "รอบันทึก" (กันกดซ้ำซ้อน) ส่วนรายการที่เหลือ (รวมตัวที่ error) จะยังอยู่ให้กด
 /// บันทึกใหม่ได้อีกครั้งโดยไม่ต้องกรอกซ้ำ
 class AddIncomeExpenseScreen extends StatefulWidget {
-  const AddIncomeExpenseScreen({super.key});
+  const AddIncomeExpenseScreen({super.key, this.initialType = CategoryType.expense});
+  final CategoryType initialType;
 
   @override
   State<AddIncomeExpenseScreen> createState() => _AddIncomeExpenseScreenState();
 }
 
 class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
-  static const double _numpadHeight = 300;
+  static const double _numpadHeight = AmountKeypad.height + 18;
   static const Duration _numpadAnim = Duration(milliseconds: 260);
   // ใช้ผูก _amountDisplay() กับ _numpadPanel() เป็นภูมิภาคเดียวกันสำหรับ TapRegion
   // เพื่อตรวจจับ "แตะข้างนอก" แล้วปิดแป้นตัวเลข โดยไม่บล็อกการเลื่อนจอ
@@ -56,19 +38,37 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
 
   CategoryType _type = CategoryType.income;
   CategoryModel? _selectedCategory;
-  String _amountText = '';
+  final _amountController = TextEditingController();
+  String get _amountText => _amountController.text;
+  set _amountText(String value) {
+    _amountController.value = TextEditingValue(
+      text: value, selection: TextSelection.collapsed(offset: value.length));
+  }
   final _noteCtrl = TextEditingController();
   bool _saving = false;
   bool _showNumpad = false;
+  String _categoryQuery = '';
 
   String? _editingId;
   List<Map<String, dynamic>> _tempTransactions = [];
   final _scrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    _type = widget.initialType;
+    _amountController.addListener(_amountChanged);
+  }
+
+  void _amountChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     _noteCtrl.dispose();
+    _amountController.dispose();
     super.dispose();
   }
 
@@ -98,20 +98,6 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
     setState(() {
       _showNumpad = false;
     });
-  }
-
-  void _pressDigit(String d) {
-    HapticFeedback.selectionClick();
-    setState(() {
-      if (d == '.' && _amountText.contains('.')) return;
-      _amountText += d;
-    });
-  }
-
-  void _backspace() {
-    if (_amountText.isEmpty) return;
-    HapticFeedback.selectionClick();
-    setState(() => _amountText = _amountText.substring(0, _amountText.length - 1));
   }
 
   String _formatAmount(double v) {
@@ -285,6 +271,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
       }
 
       if (!mounted) return;
+      showSuccessNotice(context, 'transaction_saved');
       _tempTransactions.clear();
       _editingId = null;
       _selectedCategory = null;
@@ -304,47 +291,39 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
   @override
   Widget build(BuildContext context) {
     final service = context.watch<DataService>();
-    final categories = service.categoriesByType(_type);
+    final categories = service.categoriesByType(_type).where((category) =>
+      service.categoryName(category).toLowerCase().contains(_categoryQuery.toLowerCase())).toList();
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final panelHeight = _numpadHeight + bottomInset;
     final typeAccent = _type == CategoryType.income ? AppColors.income : AppColors.expense;
+    final compactPhone = MediaQuery.sizeOf(context).height <= 700 || MediaQuery.sizeOf(context).width <= 360;
+    final topRowPadding = compactPhone ? 8.0 : 10.0;
+    final sectionGap = compactPhone ? 8.0 : 12.0;
 
     return Scaffold(
       backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: true,
-      body: Stack(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Stack(
         children: [
           Positioned.fill(
-            child: Column(
+            child: LayoutBuilder(builder: (context, constraints) {
+              // Short windows (including the keyboard) scroll the form as a
+              // whole; normal phones retain the pinned controls and header.
+              final scrollAll = MediaQuery.viewInsetsOf(context).bottom > 0 ||
+                  constraints.maxHeight < (_showNumpad ? 650 : 500);
+              final form = Column(
               children: [
                 AppHeader(
                   title: service.t('income_expense'),
                   onBack: () => Navigator.pushReplacement(
                       context, noAnimationRoute(const HomeScreen())),
-                  trailing: Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.accentDeep.withOpacity(0.22),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Icon(Icons.savings_rounded, color: AppColors.accentDeep, size: 16),
-                      ),
-                    ),
-                  ),
+                  trailing: const SizedBox.shrink(),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  padding: EdgeInsets.fromLTRB(12, topRowPadding, 12, 0),
                   child: Row(
                     children: [
                       _typeToggle(),
@@ -354,105 +333,61 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 2),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accentBg,
-                        foregroundColor: AppColors.ink,
-                        surfaceTintColor: Colors.transparent,
-                        elevation: 3,
-                        shadowColor: AppColors.shadow,
-                        minimumSize: const Size.fromHeight(76),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        side: BorderSide(color: AppColors.accent, width: 1.5),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: EdgeInsets.fromLTRB(12, topRowPadding, 12, 0),
+                  child: Row(children: [
+                    Expanded(child: TextField(
+                      key: const Key('category-search'),
+                      style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                      onTap: _closeNumpad,
+                      onChanged: (value) => setState(() => _categoryQuery = value),
+                      decoration: InputDecoration(
+                        hintText: service.currentLanguage == 'English' ? 'Search categories' : 'ค้นหาหมวดหมู่',
+                        prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        prefixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 40),
+                        isDense: true, filled: true, fillColor: AppColors.card,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
                       ),
-                      onPressed: _saving ? null : () async {
-                        _closeNumpad();
-                        final saved = await Navigator.push<bool>(context,
-                          MaterialPageRoute(builder: (_) => const ReceiptScanScreen()));
-                        if (saved == true && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(service.currentLanguage == 'English' ? 'Receipt expense saved' : 'บันทึกรายจ่ายจากใบเสร็จแล้ว')));
-                        }
-                      },
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: AppColors.card,
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Icon(Icons.document_scanner_rounded, size: 28, color: AppColors.ink),
-                          ),
-                          const SizedBox(width: 13),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(service.currentLanguage == 'English' ? 'Add from receipt' : 'เพิ่มจากใบเสร็จ',
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                                const SizedBox(height: 4),
-                                Text(service.currentLanguage == 'English' ? 'Take a photo or choose an image' : 'ถ่ายรูปหรือเลือกรูป เพื่อช่วยกรอกยอดเงิน',
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(Icons.arrow_forward_rounded, size: 23, color: AppColors.ink),
-                        ],
-                      ),
+                    )),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      tooltip: service.currentLanguage == 'English' ? 'Scan receipt' : 'สแกนใบเสร็จ',
+                      onPressed: () => Navigator.push(context, noAnimationRoute(const ReceiptScanScreen())),
+                      icon: const Icon(Icons.document_scanner_outlined),
                     ),
-                  ),
+                  ]),
                 ),
-                const SizedBox(height: 14),
-                Expanded(
+                SizedBox(height: sectionGap),
+                Flexible(
+                  flex: scrollAll ? 0 : 1,
+                  fit: FlexFit.tight,
                   child: SingleChildScrollView(
                     controller: _scrollController,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Row(
                             children: [
-                              Text(service.t('categories'), style: AppTextStyles.heading),
+                              Flexible(child: Text(service.t('categories'), style: AppTextStyles.heading, overflow: TextOverflow.ellipsis)),
                               const SizedBox(width: 5),
                               Icon(Icons.auto_awesome_rounded, size: 13, color: AppColors.accentPink),
-                              const Spacer(),
-                              Text(service.t('showing_categories'),
-                                  style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: AppColors.accentBg,
-                                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                                ),
-                                child: Text('${categories.length}',
-                                    style: TextStyle(
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.ink)),
-                              ),
+
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         _categoryRows(service, categories),
                         const SizedBox(height: 8),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Divider(height: 1, color: AppColors.border),
                         ),
                         if (_tempTransactions.isNotEmpty) ...[
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Row(
                               children: [
                                 Icon(Icons.receipt_long_rounded, size: 15, color: AppColors.textSecondary),
@@ -472,23 +407,23 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                           // สรุปยอดรวมรายรับ/รายจ่าย/สุทธิของรายการที่ "รอบันทึก" อยู่
                           // ให้ผู้ใช้เห็นผลลัพธ์ก่อนกด Save จริง ลดโอกาสกรอกผิดแล้วไม่รู้ตัว
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: _pendingSummaryCard(),
                           ),
                           const SizedBox(height: 10),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Column(
                               children: _tempTransactions.map((tx) => _transactionTile(tx, service)).toList(),
                             ),
                           ),
                         ] else ...[
                           // คำแนะนำสั้นๆ ตอนยังไม่มีรายการ ช่วยให้ผู้ใช้ใหม่รู้ว่าต้องทำอะไรต่อ
-                          const SizedBox(height: 16),
+                          SizedBox(height: sectionGap),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                               decoration: BoxDecoration(
                                 color: AppColors.accentBg.withOpacity(0.5),
                                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -513,14 +448,14 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                             ),
                           ),
                         ],
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: sectionGap),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -593,7 +528,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                       duration: _numpadAnim,
                       opacity: _showNumpad ? 0 : 1,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                         child: AppTextField(
                           controller: _noteCtrl,
                           hint: service.t('note_optional'),
@@ -608,10 +543,15 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                 AnimatedContainer(
                   duration: _numpadAnim,
                   curve: Curves.easeOutCubic,
-                  height: _showNumpad ? panelHeight : bottomInset + 8,
+                  height: _showNumpad ? (scrollAll ? 0 : panelHeight) : (compactPhone ? 0.0 : bottomInset + 4),
                 ),
               ],
-            ),
+            );
+              return scrollAll ? Padding(
+                padding: EdgeInsets.only(bottom: _showNumpad ? panelHeight : 0),
+                child: SingleChildScrollView(reverse: _showNumpad, child: form),
+              ) : form;
+            }),
           ),
 
           // เดิมใช้ Positioned.fill(GestureDetector) คลุมทั้งจอเพื่อปิดแป้นเมื่อแตะข้างนอก
@@ -630,7 +570,8 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNav(currentIndex: 2),
+      ),
+      bottomNavigationBar: _showNumpad ? null : const BottomNav(currentIndex: 2),
     );
   }
 
@@ -641,7 +582,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
       onTap: disabled ? null : _save,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
           gradient: disabled
               ? null
@@ -673,7 +614,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                   Icon(Icons.check_circle_rounded, size: 15, color: Colors.white.withOpacity(0.9)),
                   const SizedBox(width: 5),
                   Text(service.t('save'),
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                 ],
               ),
       ),
@@ -686,8 +627,8 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
     return GestureDetector(
       onTap: _addOrUpdate,
       child: Container(
-        width: 54,
-        height: 54,
+        width: 38,
+        height: 38,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: isEditing
@@ -706,7 +647,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
           ],
         ),
         child: Icon(isEditing ? Icons.check_rounded : Icons.add_rounded,
-            color: Colors.white, size: 28),
+            color: Colors.white, size: 22),
       ),
     );
   }
@@ -744,7 +685,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -780,7 +721,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
         onDismissed: (_) => _removeTransaction(tx['id']),
         background: Container(
           alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20),
+          padding: const EdgeInsets.only(right: 16),
           decoration: BoxDecoration(
             color: AppColors.expense.withOpacity(0.85),
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -890,8 +831,8 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
       onTap: _openNumpad,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -922,7 +863,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                     child: Text(
                       'กรุณาระบุจำนวนเงิน',
                       textAlign: TextAlign.right,
-                      style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                     ),
                   ),
                 ],
@@ -931,14 +872,17 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
+                  Flexible(child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    reverse: true,
+                    child: Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        _amountText,
+                        _amountText.isEmpty ? '0' : _amountText,
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 16,
                           fontWeight: FontWeight.w800,
                           color: AppColors.textPrimary,
                           letterSpacing: 0.2,
@@ -952,21 +896,21 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                       Text(
                         context.watch<DataService>().currencySymbol,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: AppColors.ink,
                         ),
                       ),
                     ],
-                  ),
+                  ))),
                   if (_showNumpad) ...[
                     const SizedBox(width: 10),
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: _finishAmountInput,
                       child: Container(
-                        width: 38,
-                        height: 38,
+                        width: 32,
+                        height: 32,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [AppColors.accentDeep, AppColors.accentDeep.withOpacity(0.85)],
@@ -982,7 +926,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.check_rounded, color: Colors.white, size: 23),
+                        child: const Icon(Icons.check_rounded, color: Colors.white, size: 20),
                       ),
                     ),
                   ],
@@ -999,8 +943,8 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
       groupId: _numpadGroupId,
       child: Material(
       color: AppColors.bg,
-      elevation: 20,
-      shadowColor: Colors.black.withOpacity(0.18),
+      elevation: 3,
+      shadowColor: AppColors.shadow,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
       child: SizedBox(
         height: _numpadHeight + bottomInset,
@@ -1031,23 +975,29 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
       ...categories.asMap().entries.map((e) => _categoryTile(e.value, service, e.key)),
       _otherCategoryTile(service),
     ];
+    final compactPhone = MediaQuery.sizeOf(context).width <= 360;
+    final crossAxisCount = compactPhone ? 3 : 4;
+    final labelPainter = TextPainter(
+      text: TextSpan(text: service.t('other_category'),
+        style: TextStyle(fontFamily: appFontFamily, fontSize: compactPhone ? 10.5 : 12.5, height: 1.4)),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context), maxLines: 1,
+    )..layout();
+    final mainAxisExtent = (compactPhone ? 30.0 : (_showNumpad ? 36.0 : 42.0)) +
+        labelPainter.height + 6;
+    labelPainter.dispose();
 
-    // ใช้ shrinkWrap + NeverScrollableScrollPhysics แทนกล่องความสูงคงที่แบบเดิม
-    // เดิม (SizedBox สูง 220 + ClampingScrollPhysics) ทำให้เกิด "สกอลล์ซ้อนสกอลล์"
-    // กับหน้าจอหลักที่เลื่อนได้อยู่แล้ว ผู้ใช้ต้องเดาว่าต้องเลื่อนตรงไหนถึงจะเห็น
-    // หมวดหมู่ที่ซ่อนอยู่ ให้กริดขยายตามจำนวนหมวดหมู่จริงและปล่อยให้หน้าจอหลัก
-    // เป็นจุดเลื่อนเดียว ใช้งานลื่นไหลกว่าเดิมมาก
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: GridView.builder(
         padding: EdgeInsets.zero,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
+          crossAxisCount: crossAxisCount,
           mainAxisSpacing: 8,
-          crossAxisSpacing: 4,
-          mainAxisExtent: _showNumpad ? 72 : 96,
+          crossAxisSpacing: 8,
+          mainAxisExtent: mainAxisExtent,
         ),
         itemCount: tiles.length,
         itemBuilder: (context, i) => tiles[i],
@@ -1057,119 +1007,67 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
 
   Widget _categoryTile(CategoryModel c, DataService service, int index) {
     final selected = _selectedCategory?.id == c.id;
-    final tintIcon = _categoryTintIcon[index % _categoryTintIcon.length];
-    final pastel = [AppColors.accentBg, AppColors.accentAltBg,
-      const Color(0xFFEAE5FA), const Color(0xFFE1F2EC)][index % 4];
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
-        HapticFeedback.selectionClick();
-        setState(() {
-          _selectedCategory = c;
-          _showNumpad = true;
-        });
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // เพิ่มเอฟเฟกต์ "เด้งเล็กน้อย" ตอนถูกเลือก ให้ดูมีชีวิตชีวาน่ารักขึ้น
-          AnimatedScale(
-            scale: selected ? 1.04 : 1.0,
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutBack,
-            child: AnimatedContainer(
-            duration: Duration.zero,
-            curve: Curves.easeOut,
-            width: _showNumpad ? 44 : 60,
-            height: _showNumpad ? 44 : 60,
+    final compactPhone = MediaQuery.sizeOf(context).width <= 360;
+    final iconSize = compactPhone ? 18.0 : (_showNumpad ? 22.0 : 28.0);
+    final labelSize = compactPhone ? 10.0 : 11.0;
+    return Semantics(selected: selected, button: true,
+      child: Material(
+        color: selected ? AppColors.accentBg : c.colorValue != null
+            ? Color(c.colorValue!).withValues(alpha: 0.28) : AppColors.card,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            FocusScope.of(context).unfocus();
+            SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+            HapticFeedback.selectionClick();
+            setState(() { _selectedCategory = c; _showNumpad = true; });
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(_showNumpad ? 15 : 20),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft, end: Alignment.bottomRight,
-                colors: [AppColors.surfaceAlt, Color.lerp(AppColors.card, pastel, 0.7)!],
-              ),
-              border: Border.all(
-                color: selected ? AppColors.accentPink : Color.lerp(AppColors.border, pastel, 0.6)!,
-                width: selected ? 2 : 1.3,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: selected
-                      ? AppColors.accentPink.withOpacity(0.23)
-                      : AppColors.accentDeep.withOpacity(0.09),
-                  blurRadius: selected ? 12 : 8,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: selected ? AppColors.accentDeep : AppColors.border.withValues(alpha: 0.35), width: selected ? 2 : 1),
             ),
-            // ไอคอนขยายใหญ่ขึ้นให้ใช้พื้นที่ ~85% ของกล่อง (เหลือ margin ~8-12%)
-            // ใช้ fill+zoom เพื่อ "ตัด" พื้นที่โปร่งใส/ขอบว่างรอบไฟล์ไอคอนต้นฉบับออกไปก่อน
-            // แล้วจึงขยาย artwork จริงให้เต็มกรอบมากขึ้น โดยไม่ยืด/บิดสัดส่วน และไม่ทำให้กรอบ
-            // (คอนเทนเนอร์ 60x60 ด้านนอก) ขยายขนาดตามไปด้วย
-            child: Center(
-              child: SizedBox(
-                width: _showNumpad ? 38 : 52,
-                height: _showNumpad ? 38 : 52,
-                child: ColorFiltered(
-                  colorFilter: const ColorFilter.matrix([
-                    0.86, 0.08, 0.06, 0, 5,
-                    0.04, 0.91, 0.05, 0, 3,
-                    0.04, 0.09, 0.87, 0, 7,
-                    0, 0, 0, 1, 0,
-                  ]),
-                  child: CategoryIcon(
-                  category: c,
-                  color: selected ? AppColors.accentDeep : tintIcon,
-                  size: _showNumpad ? 38 : 52,
-                  fill: true,
-                  zoom: 1.12,
-                  ),
-                ),
-              ),
-            ),
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              CategoryIcon(category: c, size: iconSize, color: AppColors.accentDeep),
+              SizedBox(height: compactPhone ? 2 : 4),
+              Text(service.categoryName(c), maxLines: 1, overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontFamily: appFontFamily, height: 1.4, fontSize: labelSize, color: AppColors.ink,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500)),
+            ]),
           ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            service.categoryName(c),
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? AppColors.ink : AppColors.textSecondary,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _otherCategoryTile(DataService service) {
+    final compactPhone = MediaQuery.sizeOf(context).width <= 360;
     return GestureDetector(
       onTap: () => _showAddCategoryDialog(service),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: _showNumpad ? 44 : 60,
-            height: _showNumpad ? 44 : 60,
+            width: compactPhone ? 26.0 : (_showNumpad ? 30.0 : 36.0),
+            height: compactPhone ? 26.0 : (_showNumpad ? 30.0 : 36.0),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(_showNumpad ? 15 : 20),
+              borderRadius: BorderRadius.circular(compactPhone ? 13.0 : (_showNumpad ? 15.0 : 20.0)),
               color: AppColors.accentAltBg,
               border: Border.all(
                 color: AppColors.border,
                 width: 1.4,
               ),
             ),
-            child: Icon(Icons.add_rounded, color: AppColors.accentPink, size: 26),
+            child: Icon(Icons.add_rounded, color: AppColors.accentPink, size: compactPhone ? 18.0 : 22.0),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: compactPhone ? 4.0 : 6.0),
           Text(
             service.t('other_category'),
-            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+            style: TextStyle(fontFamily: appFontFamily, height: 1.4, fontSize: compactPhone ? 10.5 : 12.5, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -1181,214 +1079,21 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
 
   Future<void> _showAddCategoryDialog(DataService service) async {
     _closeNumpad();
-    final nameCtrl = TextEditingController();
-    IconData selectedIcon = _customCategoryIcons.first;
-
-    await showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.45),
-      builder: (dialogContext) {
-        bool saving = false;
-        String? errorText;
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            Future<void> confirm() async {
-              final name = nameCtrl.text.trim();
-              if (name.isEmpty) {
-                setDialogState(() => errorText = service.t('please_enter_category_name'));
-                return;
-              }
-              setDialogState(() {
-                saving = true;
-                errorText = null;
-              });
-              final created = await service.addCategory(name, _type, selectedIcon);
-              if (!mounted) return;
-              setState(() {
-                _selectedCategory = created;
-                _showNumpad = true;
-              });
-              if (dialogContext.mounted) Navigator.pop(dialogContext);
-            }
-
-            return Dialog(
-              backgroundColor: AppColors.bg,
-              insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                            gradient: LinearGradient(
-                              colors: [AppColors.accentBg, AppColors.accentBg.withOpacity(0.6)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                          child: GoalArtwork(selectedIcon, size: 38),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(service.t('add_custom_category_title'),
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
-                        ),
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          onPressed: saving ? null : () => Navigator.pop(dialogContext),
-                          icon: const Icon(Icons.close_rounded, size: 20),
-                          color: AppColors.textSecondary,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    AppTextField(
-                      controller: nameCtrl,
-                      hint: service.t('category_name_hint'),
-                      icon: Icons.label_outline_rounded,
-                      autofocus: true,
-                      errorText: errorText,
-                      onChanged: (_) {
-                        if (errorText != null) setDialogState(() => errorText = null);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Text(service.t('choose_icon'),
-                        style: AppTextStyles.label.copyWith(color: AppColors.textSecondary)),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 140,
-                      child: GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 5,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                        ),
-                        itemCount: _customCategoryIcons.length,
-                        itemBuilder: (context, i) {
-                          final icon = _customCategoryIcons[i];
-                          final selected = icon == selectedIcon;
-                          return GestureDetector(
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              setDialogState(() => selectedIcon = icon);
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(AppRadius.md),
-                                gradient: selected
-                                    ? LinearGradient(
-                                        colors: [AppColors.accentBg, AppColors.accentAltBg])
-                                    : null,
-                                color: selected ? null : AppColors.surface,
-                                border: Border.all(
-                                  color: selected ? AppColors.accentPink : AppColors.border,
-                                  width: selected ? 2 : 1,
-                                ),
-                                boxShadow: selected
-                                    ? [
-                                        BoxShadow(
-                                          color: AppColors.accentDeep.withOpacity(0.35),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ]
-                                    : [],
-                              ),
-                              padding: const EdgeInsets.all(5),
-                              child: LayoutBuilder(
-                                builder: (context, constraints) => GoalArtwork(
-                                  icon, size: constraints.biggest.shortestSide),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 13),
-                              side: BorderSide(color: AppColors.border),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(AppRadius.md)),
-                            ),
-                            onPressed: saving ? null : () => Navigator.pop(dialogContext),
-                            child: Text(service.t('cancel'),
-                                style:
-                                    TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [AppColors.accentPink, AppColors.accentDeep],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(AppRadius.md),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.accentPink.withOpacity(0.35),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(AppRadius.md),
-                                onTap: saving ? null : confirm,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 13),
-                                  child: Center(
-                                    child: saving
-                                        ? const SizedBox(
-                                            height: 16,
-                                            width: 16,
-                                            child: CircularProgressIndicator(
-                                                strokeWidth: 2, color: Colors.white))
-                                        : Text(service.t('add'),
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w600, color: Colors.white)),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
+    final created = await showModalBottomSheet<CategoryModel>(
+      context: context, isScrollControlled: true, useSafeArea: true,
+      backgroundColor: AppColors.bg,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (_) => CategoryEditorSheet(service: service, type: _type),
     );
+    if (!mounted || created == null) return;
+    setState(() { _selectedCategory = created; _showNumpad = true; });
   }
 
   Widget _typeToggle() {
     final service = context.watch<DataService>();
     final isIncome = _type == CategoryType.income;
-    const toggleWidth = 176.0;
-    const toggleHeight = 38.0;
+    const toggleWidth = 160.0;
+    const toggleHeight = 34.0;
     return Container(
       width: toggleWidth,
       height: toggleHeight,
@@ -1445,7 +1150,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                     if (_editingId == null) _selectedCategory = null;
                   }),
                   child: Center(
-                    child: Row(
+                    child: FittedBox(child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CuteMascot(
@@ -1456,6 +1161,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                         AnimatedDefaultTextStyle(
                           duration: const Duration(milliseconds: 200),
                           style: TextStyle(
+                            fontFamily: appFontFamily,
                             color: isIncome ? Colors.white : AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                             fontSize: 11.5,
@@ -1463,7 +1169,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                           child: Text(service.t('incomes_tab')),
                         ),
                       ],
-                    ),
+                    )),
                   ),
                 ),
               ),
@@ -1475,7 +1181,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                     if (_editingId == null) _selectedCategory = null;
                   }),
                   child: Center(
-                    child: Row(
+                    child: FittedBox(child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CuteMascot(
@@ -1486,6 +1192,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                         AnimatedDefaultTextStyle(
                           duration: const Duration(milliseconds: 200),
                           style: TextStyle(
+                            fontFamily: appFontFamily,
                             color: !isIncome ? Colors.white : AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                             fontSize: 11.5,
@@ -1493,7 +1200,7 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
                           child: Text(service.t('expenses_tab')),
                         ),
                       ],
-                    ),
+                    )),
                   ),
                 ),
               ),
@@ -1504,144 +1211,9 @@ class _AddIncomeExpenseScreenState extends State<AddIncomeExpenseScreen> {
     );
   }
 
-  Widget _numPad() {
-    const rows = [
-      ['7', '8', '9'],
-      ['4', '5', '6'],
-      ['1', '2', '3'],
-      ['.', '0', '⌫'],
-    ];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Column(
-        children: rows
-            .map((row) => Expanded(
-                  child: Row(
-                    children: row
-                        .map((key) => Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                                child: _NumpadKey(
-                                  label: key,
-                                  bg: _keyBg(key),
-                                  fg: _keyFg(key),
-                                  shadow: _keyShadow(key),
-                                  onTap: () => key == '⌫' ? _backspace() : _pressDigit(key),
-                                ),
-                              ),
-                            ))
-                        .toList(),
-                  ),
-                ))
-            .toList(),
-      ),
-    );
-  }
-
-  // สีคีย์แบบพาสเทลหลากสี พร้อมเงาโทนเข้มกว่านิดหน่อยให้ดูเป็นปุ่มกดมีมิติน่ารัก
-  Color _keyBg(String key) {
-    switch (key) {
-      case '⌫':
-        return const Color(0xFFDCEEF7);
-      case '.':
-        return const Color(0xFFFFF3D2);
-      default:
-        return AppColors.surface;
-    }
-  }
-
-  Color _keyFg(String key) {
-    switch (key) {
-      case '⌫':
-        return const Color(0xFF6FA3D6);
-      case '.':
-        return const Color(0xFFC79A3B);
-      default:
-        return AppColors.textPrimary;
-    }
-  }
-
-  Color _keyShadow(String key) {
-    switch (key) {
-      case '⌫':
-        return const Color(0xFFC3E0F0);
-      case '.':
-        return const Color(0xFFF0DFA8);
-      default:
-        return AppColors.border.withOpacity(0.8);
-    }
-  }
-}
-
-/// เคอร์เซอร์กระพริบ ใช้แสดงต่อท้ายจำนวนเงินระหว่างพิมพ์
-/// ปุ่มตัวเลขของแป้นกด — เพิ่มลูกเล่นให้ "เด้ง" นิดๆ ตอนกด (ย่อขนาดแล้วดีดกลับ)
-/// ให้ความรู้สึกนุ่มนวลน่ารักขึ้นกว่าปุ่มแบนราบเดิม โดยยังใช้สี/เงาชุดเดิมทั้งหมด
-/// ตอนนี้ปุ่มเป็นสี่เหลี่ยมมุมโค้ง (ห่อด้วย AspectRatio 1:1 เพื่อให้เป็นสี่เหลี่ยมจัตุรัสสมบูรณ์แม้อยู่ใน Row/Expanded)
-class _NumpadKey extends StatefulWidget {
-  final String label;
-  final Color bg;
-  final Color fg;
-  final Color shadow;
-  final VoidCallback onTap;
-
-  const _NumpadKey({
-    required this.label,
-    required this.bg,
-    required this.fg,
-    required this.shadow,
-    required this.onTap,
-  });
-
-  @override
-  State<_NumpadKey> createState() => _NumpadKeyState();
-}
-
-class _NumpadKeyState extends State<_NumpadKey> {
-  bool _pressed = false;
-
-  void _setPressed(bool value) {
-    if (_pressed == value) return;
-    setState(() => _pressed = value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _setPressed(true),
-      onTapCancel: () => _setPressed(false),
-      onTapUp: (_) => _setPressed(false),
-      onTap: widget.onTap,
-      child: AnimatedScale(
-        scale: _pressed ? 0.88 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeOut,
-        child: AspectRatio(
-          aspectRatio: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              color: widget.bg,
-              boxShadow: [
-                BoxShadow(
-                  color: widget.shadow,
-                  offset: const Offset(0, 3),
-                  blurRadius: 0,
-                ),
-              ],
-            ),
-            child: Center(
-              child: widget.label == '⌫'
-                  ? Icon(Icons.backspace_rounded, size: 20, color: widget.fg)
-                  : Text(widget.label,
-                      style: TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.w600, color: widget.fg)),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _numPad() => AmountKeypad(
+    controller: _amountController,
+  );
 }
 
 class _BlinkingCursor extends StatefulWidget {

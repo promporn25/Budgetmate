@@ -1,16 +1,21 @@
-import 'dart:typed_data';
+import '../widgets/success_notice.dart';
+import 'package:flutter/services.dart';
+import '../services/local_receipt_store.dart';
+import '../widgets/receipt_scan_error_dialog.dart';
+import '../widgets/amount_keypad.dart';
+import '../widgets/receipt_category_picker.dart';
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 import '../models/category_model.dart';
 import '../services/data_service.dart';
 import '../services/receipt_service.dart';
 import '../widgets/pastel_artwork.dart';
 import 'app_theme.dart';
+import 'history_screen.dart'; // ปรับชื่อไฟล์/คลาสให้ตรงกับโปรเจกต์
 
 class ReceiptScanScreen extends StatefulWidget {
   const ReceiptScanScreen({super.key});
@@ -25,11 +30,12 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
   String _contentType = 'image/jpeg';
   DateTime _date = DateTime.now();
   CategoryModel? _category;
-  String? _uploadedPath;
+  String? _localReceiptPath;
   String? _currency;
   String? _owner;
   String? _message;
   bool _busy = false;
+  bool _scanSucceeded = false;
   bool get _thai => context.read<DataService>().currentLanguage != 'English';
   String _t(String th, String en) => _thai ? th : en;
 
@@ -75,9 +81,10 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
       }
       if (!mounted) return;
       setState(() {
+        _scanSucceeded = false;
         _image = bytes;
         _contentType = contentType;
-        _uploadedPath = null;
+        _localReceiptPath = null;
         _currency = context.read<DataService>().currentCurrency;
         _owner = FirebaseAuth.instance.currentUser?.uid;
         _amount.clear();
@@ -102,6 +109,7 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
       final draft = await ReceiptService().scan(_image!);
       if (!mounted) return;
       setState(() {
+        _scanSucceeded = true;
         _amount.text = draft.amount?.toStringAsFixed(2) ?? '';
         _note.text = draft.merchant;
         _date = draft.date ?? DateTime.now();
@@ -109,17 +117,48 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
             'ตรวจยอดเงิน สกุลเงิน และวันที่ แล้วเลือกหมวดหมู่ก่อนบันทึก หากไม่พบวันที่จะใช้วันนี้',
             'Review amount, currency and date, then choose a category. Missing dates default to today.');
       });
-    } catch (_) {
-      if (mounted) {
-        setState(() => _message = _t(
-            'อ่านใบเสร็จไม่ได้ ตรวจการเชื่อมต่อและการตั้งค่าบริการสแกน หรือกรอกข้อมูลด้านล่างเพื่อบันทึกพร้อมรูป',
-            'Scanning failed. Check connection and scanner setup, or enter details below to save with the image.'));
-      }
+    } catch (error) {
+      if (!mounted) return;
+      final serviceError = error is PlatformException ||
+          error is MissingPluginException ||
+          error is UnsupportedError;
+      final timedOut = error is TimeoutException;
+      final message = timedOut
+          ? _t(
+              'อ่านรูปใช้เวลานานเกินไป กรุณาลองใช้รูปที่ครอปเฉพาะสลิปหรือใบเสร็จ',
+              'Reading took too long. Try a photo cropped to the slip or receipt.')
+          : error is StateError
+              ? _t('ตัวอ่านรูปยังทำงานอยู่ กรุณารอสักครู่แล้วลองใหม่',
+                  'The previous scan is still finishing. Please wait and retry.')
+              : error is UnsupportedError
+                  ? _t(
+                      'การสแกนออฟไลน์รองรับ Android และ iPhone กรุณาเปิดแอปบนมือถือ',
+                      'Offline scanning supports Android and iPhone. Please use the mobile app.')
+                  : serviceError
+                      ? _t(
+                          'ตัวอ่านรูปบนเครื่องไม่พร้อมใช้งาน กรุณาปิดแล้วเปิดแอปใหม่ หากยังไม่ได้ให้ติดตั้งแอปรุ่นล่าสุด',
+                          'The on-device scanner is unavailable. Restart the app or install the latest version.')
+                      : _t(
+                          'อ่านยอดเงินจากรูปนี้ไม่ได้ กรุณาใช้ภาพใบเสร็จหรือสลิปที่ชัดเจน แล้วลองใหม่',
+                          'Could not read a total. Choose a clear receipt or payment slip and try again.');
+      setState(() {
+        _scanSucceeded = false;
+        _message = message;
+      });
+      await showDialog<void>(
+        context: context,
+        barrierColor: AppColors.ink.withValues(alpha: 0.28),
+        builder: (_) => ReceiptScanErrorDialog(
+            isThai: _thai,
+            timedOut: timedOut,
+            serviceUnavailable: serviceError,
+            message: message),
+      );
     }
   }
 
   Future<void> _save() async {
-    if (_busy) return;
+    if (_busy || !_scanSucceeded) return;
     final service = context.read<DataService>();
     final amount = double.tryParse(_amount.text.trim().replaceAll(',', ''));
     if (amount == null ||
@@ -141,15 +180,12 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
       _busy = true;
       _message = null;
     });
+    var saved = false;
+    final receiptStore = LocalReceiptStore();
     try {
-      if (_uploadedPath == null) {
-        final path = 'receipts/$uid/${const Uuid().v4()}';
-        // Store a private Storage path, never a publicly shareable download URL.
-        await FirebaseStorage.instance
-            .ref(path)
-            .putData(_image!, SettableMetadata(contentType: _contentType));
-        _uploadedPath = path;
-      }
+      _localReceiptPath ??= await receiptStore.save(_image!,
+          owner: uid, isPng: _contentType == 'image/png');
+
       if (FirebaseAuth.instance.currentUser?.uid != uid ||
           service.currentCurrency != _currency) {
         throw StateError('Account or currency changed');
@@ -160,20 +196,34 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
           category: _category!,
           date: _date,
           note: _note.text.trim(),
-          receiptPath: _uploadedPath);
+          receiptPath: _localReceiptPath);
+      saved = error == null;
       if (!mounted) return;
       if (error != null) {
         setState(() => _message = error);
         return;
       }
-      Navigator.pop(context, true);
+      showSuccessNotice(context, 'transaction_saved');
+      // บันทึกสำเร็จ → ไปหน้าประวัติ (แทนที่หน้าสแกน กดย้อนกลับแล้วไม่วนกลับมาหน้าสแกน)
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HistoryScreen()),
+      );
     } catch (_) {
       if (mounted) {
         setState(() => _message = _t(
-            'บันทึกไม่สำเร็จ ตรวจอินเทอร์เน็ตและสิทธิ์ Storage แล้วลองอีกครั้ง ข้อมูลยังอยู่',
-            'Could not save. Check connection and Storage permissions, then retry. Your details are retained.'));
+            'บันทึกไม่สำเร็จ ตรวจพื้นที่ว่างและการเชื่อมต่อ แล้วลองอีกครั้ง ข้อมูลยังอยู่',
+            'Could not save. Check free storage and your connection, then retry. Your details are retained.'));
       }
     } finally {
+      if (!saved && _localReceiptPath != null) {
+        final orphan = _localReceiptPath!;
+        _localReceiptPath = null;
+        try {
+          await receiptStore.delete(orphan);
+        } catch (_) {
+          // Cleanup failure must not hide the original save error.
+        }
+      }
       if (mounted) setState(() => _busy = false);
     }
   }
@@ -192,13 +242,15 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
 
   InputDecoration _fieldDecoration(String label, IconData icon) =>
       InputDecoration(
+        isDense: true,
+        constraints: const BoxConstraints(minHeight: 48),
         labelText: label,
         labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         prefixIcon: Icon(icon, size: 21, color: AppColors.ink),
         filled: true,
         fillColor: AppColors.surface,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(color: AppColors.border)),
@@ -223,10 +275,10 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
         borderRadius: BorderRadius.circular(20),
         onTap: _busy ? null : () => _pick(source),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
           child: Column(children: [
             Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                     color: AppColors.card,
                     borderRadius: BorderRadius.circular(16)),
@@ -235,7 +287,7 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
             Text(title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary)),
             const SizedBox(height: 3),
@@ -285,12 +337,12 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
         body: AbsorbPointer(
           absorbing: _busy,
           child: Column(children: [
-            AppHeader(title: _t('เพิ่มจากใบเสร็จ', 'Add from receipt')),
+            AppHeader(title: _t('สลิป / ใบเสร็จ', 'Slip / receipt')),
             Expanded(
                 child: SafeArea(
                     top: false,
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                       child: Center(
                           child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 520),
@@ -303,26 +355,26 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                 Icon(Icons.chevron_right_rounded,
                                     size: 17, color: AppColors.textSecondary),
                                 _step('2', _t('ตรวจข้อมูล', 'Review'),
-                                    _image != null),
+                                    _scanSucceeded),
                                 Icon(Icons.chevron_right_rounded,
                                     size: 17, color: AppColors.textSecondary),
                                 _step('3', _t('บันทึก', 'Save'), false),
                               ]),
-                              const SizedBox(height: 22),
+                              const SizedBox(height: 16),
                               Container(
                                 decoration: _cardDecoration(),
-                                padding: const EdgeInsets.all(22),
+                                padding: const EdgeInsets.all(12),
                                 child: Column(children: [
                                   if (_image == null) ...[
                                     SizedBox(
-                                        height: 116,
-                                        width: 170,
+                                        height: 88,
+                                        width: 136,
                                         child: Stack(
                                             alignment: Alignment.center,
                                             children: [
                                               Container(
-                                                  width: 110,
-                                                  height: 100,
+                                                  width: 80,
+                                                  height: 76,
                                                   decoration: BoxDecoration(
                                                       color: AppColors.accentBg,
                                                       borderRadius:
@@ -347,19 +399,19 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                           AppColors.accentPink,
                                                       size: 18)),
                                             ])),
-                                    const SizedBox(height: 14),
+                                    const SizedBox(height: 12),
                                     Text(
-                                        _t('ให้ใบเสร็จช่วยจดให้',
-                                            'Let your receipt do the typing'),
+                                        _t('เพิ่มรายจ่ายจากสลิปธนาคาร',
+                                            'Add an expense from a bank slip'),
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                            fontSize: 21,
+                                            fontSize: 19,
                                             fontWeight: FontWeight.w700,
                                             color: AppColors.textPrimary)),
                                     const SizedBox(height: 8),
                                     Text(
-                                        _t('เก็บรูปไว้ แล้วให้เราช่วยอ่านยอดเงิน',
-                                            'Add a photo and we’ll help read the total'),
+                                        _t('เลือกรูปสลิปธนาคารหรือใบเสร็จ เพื่ออ่านยอดเงิน',
+                                            'Choose a bank slip or receipt to read the amount'),
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                             fontSize: 14,
@@ -371,14 +423,14 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                       const SizedBox(width: 8),
                                       Expanded(
                                           child: Text(
-                                              _t('ใบเสร็จของคุณ',
-                                                  'Your receipt'),
+                                              _t('สลิป / ใบเสร็จของคุณ',
+                                                  'Your slip / receipt'),
                                               style: AppTextStyles.heading)),
                                       Icon(Icons.favorite_rounded,
                                           color: AppColors.accentPink,
                                           size: 18),
                                     ]),
-                                    const SizedBox(height: 16),
+                                    const SizedBox(height: 12),
                                     ClipRRect(
                                         borderRadius: BorderRadius.circular(16),
                                         child: Container(
@@ -397,7 +449,7 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                         color: AppColors
                                                             .textSecondary))))),
                                   ],
-                                  const SizedBox(height: 22),
+                                  const SizedBox(height: 16),
                                   Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -425,11 +477,11 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                 title: _t(
                                                     'ถ่ายรูป', 'Take a photo'),
                                                 subtitle: _t(
-                                                    'เก็บใบเสร็จใบใหม่',
-                                                    'Capture a receipt'),
+                                                    'ถ่ายสลิป / ใบเสร็จ',
+                                                    'Capture a slip or receipt'),
                                                 color: AppColors.accentBg)),
                                       ]),
-                                  const SizedBox(height: 14),
+                                  const SizedBox(height: 12),
                                   Text(
                                       'JPG / PNG · ${_t('ไม่เกิน 5 MB', 'Up to 5 MB')}',
                                       style: TextStyle(
@@ -437,12 +489,12 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                           color: AppColors.textSecondary)),
                                 ]),
                               ),
-                              if (_busy) ...[
-                                const SizedBox(height: 16),
+                              if (_busy && _message == null) ...[
+                                const SizedBox(height: 12),
                                 Semantics(
                                     liveRegion: true,
                                     child: Container(
-                                        padding: const EdgeInsets.all(18),
+                                        padding: const EdgeInsets.all(12),
                                         decoration: _cardDecoration(
                                             color: AppColors.accentBg),
                                         child: Row(children: [
@@ -463,11 +515,11 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                         ]))),
                               ],
                               if (_message != null) ...[
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 12),
                                 Semantics(
                                     liveRegion: true,
                                     child: Container(
-                                        padding: const EdgeInsets.all(16),
+                                        padding: const EdgeInsets.all(12),
                                         decoration: _cardDecoration(
                                             color: AppColors.accentAltBg),
                                         child: Row(
@@ -489,10 +541,10 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                               .textPrimary))),
                                             ]))),
                               ],
-                              if (_image != null) ...[
-                                const SizedBox(height: 22),
+                              if (_image != null && _scanSucceeded) ...[
+                                const SizedBox(height: 16),
                                 Container(
-                                    padding: const EdgeInsets.all(20),
+                                    padding: const EdgeInsets.all(12),
                                     decoration: _cardDecoration(),
                                     child: Column(
                                         crossAxisAlignment:
@@ -504,53 +556,80 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                               style: AppTextStyles.heading),
                                           const SizedBox(height: 6),
                                           Text(
-                                              _t('แก้ข้อมูลให้ตรงกับใบเสร็จได้เลย',
-                                                  'Make sure the details match your receipt'),
+                                              _t('ตรวจยอดเงิน ชื่อผู้รับ และวันที่ให้ตรงกับรูป',
+                                                  'Check the amount, recipient and date against your image'),
                                               style: TextStyle(
                                                   fontSize: 13,
                                                   color:
                                                       AppColors.textSecondary)),
-                                          const SizedBox(height: 22),
+                                          const SizedBox(height: 16),
                                           TextField(
                                               controller: _amount,
-                                              keyboardType:
-                                                  const TextInputType
-                                                      .numberWithOptions(
-                                                      decimal: true),
+                                              readOnly: true,
+                                              keyboardType: TextInputType.none,
+                                              onTap: () => showAmountKeypad(
+                                                  context,
+                                                  controller: _amount,
+                                                  title: _t(
+                                                      'ยอดเงิน ($_currency)',
+                                                      'Amount ($_currency)')),
                                               decoration: _fieldDecoration(
                                                   _t('ยอดเงิน ($_currency)',
                                                       'Amount ($_currency)'),
                                                   Icons.payments_outlined)),
-                                          const SizedBox(height: 18),
+                                          const SizedBox(height: 14),
                                           TextField(
                                               controller: _note,
                                               decoration: _fieldDecoration(
-                                                  _t('ร้านค้า / หมายเหตุ',
-                                                      'Merchant / note'),
+                                                  _t('ร้านค้า / ผู้รับ / หมายเหตุ',
+                                                      'Merchant / recipient / note'),
                                                   Icons.storefront_outlined)),
-                                          const SizedBox(height: 18),
-                                          DropdownButtonFormField<
-                                                  CategoryModel>(
-                                              key: ValueKey(_image),
-                                              initialValue: categories.any(
-                                                      (c) =>
-                                                          c.id == _category?.id)
-                                                  ? categories.firstWhere((c) =>
-                                                      c.id == _category!.id)
-                                                  : null,
-                                              isExpanded: true,
+                                          const SizedBox(height: 14),
+                                          InkWell(
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                            onTap: _busy
+                                                ? null
+                                                : () async {
+                                                    final selected =
+                                                        await showReceiptCategoryPicker(
+                                                      context,
+                                                      categories: categories,
+                                                      selectedId: _category?.id,
+                                                      thai: _thai,
+                                                    );
+                                                    if (selected != null &&
+                                                        mounted) {
+                                                      setState(() =>
+                                                          _category = selected);
+                                                    }
+                                                  },
+                                            child: InputDecorator(
                                               decoration: _fieldDecoration(
                                                   _t('หมวดรายจ่าย',
                                                       'Expense category'),
                                                   Icons.grid_view_rounded),
-                                              items: categories
-                                                  .map((c) => DropdownMenuItem(
-                                                      value: c,
-                                                      child: Text(c.name)))
-                                                  .toList(),
-                                              onChanged: (value) => setState(
-                                                  () => _category = value)),
-                                          const SizedBox(height: 18),
+                                              child: Row(children: [
+                                                if (_category != null) ...[
+                                                  CategoryIcon(
+                                                      category: _category!,
+                                                      size: 30),
+                                                  const SizedBox(width: 10),
+                                                ],
+                                                Expanded(
+                                                    child: Text(
+                                                        _category?.name ??
+                                                            _t('เลือกหมวดหมู่',
+                                                                'Choose a category'),
+                                                        style: TextStyle(
+                                                            color: AppColors
+                                                                .textPrimary))),
+                                                Icon(Icons.expand_more_rounded,
+                                                    color: AppColors.ink),
+                                              ]),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 14),
                                           Material(
                                               color: AppColors.surface,
                                               borderRadius:
@@ -561,7 +640,7 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                           16)),
                                                   leading: Icon(Icons.calendar_month_rounded,
                                                       color: AppColors.ink),
-                                                  title: Text(_t('วันที่บนใบเสร็จ', 'Receipt date'),
+                                                  title: Text(_t('วันที่ทำรายการ', 'Transaction date'),
                                                       style: TextStyle(
                                                           fontSize: 12,
                                                           color: AppColors
@@ -571,7 +650,7 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                           style: TextStyle(
                                                               color: AppColors
                                                                   .textPrimary,
-                                                              fontSize: 15)),
+                                                              fontSize: 14)),
                                                   trailing: Icon(Icons.edit_outlined,
                                                       color: AppColors.ink,
                                                       size: 19),
@@ -590,7 +669,7 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                           () => _date = date);
                                                     }
                                                   })),
-                                          const SizedBox(height: 24),
+                                          const SizedBox(height: 18),
                                           FilledButton.icon(
                                               onPressed: _busy ? null : _save,
                                               style: FilledButton.styleFrom(
@@ -601,8 +680,8 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                       const Size.fromHeight(54),
                                                   padding:
                                                       const EdgeInsets.symmetric(
-                                                          horizontal: 14,
-                                                          vertical: 16),
+                                                          horizontal: 10,
+                                                          vertical: 12),
                                                   shape: RoundedRectangleBorder(
                                                       borderRadius:
                                                           BorderRadius.circular(
@@ -615,9 +694,9 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                   textAlign: TextAlign.center)),
                                         ])),
                               ] else ...[
-                                const SizedBox(height: 20),
+                                const SizedBox(height: 16),
                                 Container(
-                                    padding: const EdgeInsets.all(18),
+                                    padding: const EdgeInsets.all(12),
                                     decoration: _cardDecoration(
                                         color: AppColors.accentAltBg),
                                     child: Row(
@@ -643,8 +722,8 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                                         fontSize: 14)),
                                                 const SizedBox(height: 4),
                                                 Text(
-                                                    _t('ถ่ายให้เห็นใบเสร็จครบทั้งใบ\nวางให้ตรง และหลีกเลี่ยงแสงสะท้อน',
-                                                        'Include the whole receipt. Keep it straight and avoid glare.'),
+                                                    _t('ใช้รูปสลิปจากแอปธนาคาร หรือใบเสร็จที่เห็นยอดเงินครบ\nวางให้ตรง และหลีกเลี่ยงแสงสะท้อน',
+                                                        'Use a bank app slip or a full receipt with the amount visible. Keep it straight and avoid glare.'),
                                                     style: TextStyle(
                                                         fontSize: 13,
                                                         height: 1.6,
@@ -652,10 +731,10 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
                                               ])),
                                         ])),
                               ],
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 16),
                               Text(
-                                  _t('รูปจะถูกส่งให้บริการอ่านใบเสร็จ\nคุณตรวจแก้ข้อมูลได้ก่อนกดยืนยันบันทึก',
-                                      'Your photo is sent to the receipt scanner.\nReview and edit the details before saving.'),
+                                  _t('อ่านรูปบนเครื่องฟรี ไม่ส่งรูปไปบริการสแกน\nรูปแนบเก็บเฉพาะเครื่องนี้และไม่ซิงก์ข้ามเครื่อง ตรวจข้อมูลก่อนบันทึก ระบบไม่ได้ยืนยันการโอนเงินจริง',
+                                      'Scanned on your device for free. Attachments stay on this device and do not sync. Review before saving. This does not verify the bank transfer.'),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 12,
@@ -676,6 +755,6 @@ class _ReceiptArtwork extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Transform.rotate(
         angle: -0.10,
-        child: const GoalArtwork(Icons.receipt_long, size: 100),
+        child: const GoalArtwork(Icons.receipt_long, size: 60),
       );
 }

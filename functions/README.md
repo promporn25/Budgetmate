@@ -1,3 +1,8 @@
+> The app now uses bundled on-device Tesseract OCR and local receipt images.
+> No Functions deployment, Cloud Vision API, Firebase Storage or Blaze upgrade
+> is needed for scanning. The cloud setup below is retained for the old backend.
+> See `../flutter_application_1/OFFLINE_RECEIPTS.md` for the current setup.
+
 # Receipt scanner setup
 
 The app sends a selected JPG/PNG (up to 5 MB) to the authenticated `scanReceipt`
@@ -15,7 +20,9 @@ conversion or line-item splitting is performed. Dates not recognized use today.
 2. Install Node 22 and Firebase CLI, authenticate to the intended project.
 3. From `functions/`, run `npm ci`.
 4. From the repository root (not `flutter_application_1/`), run:
-   `firebase deploy --only functions:scanReceipt,storage --project budgetmate-app-a94da`
+   `firebase deploy --only functions:receipts,storage --project budgetmate-app-a94da`
+   The configured codebase is `receipts`; to deploy only the scanner backend,
+   use `--only functions:receipts`.
 5. From `flutter_application_1/`, run `flutter pub get` and rebuild the app.
    For iOS, refresh CocoaPods if the build requests it.
 

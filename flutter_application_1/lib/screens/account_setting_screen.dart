@@ -12,12 +12,6 @@ import 'change_password_screen.dart';
 const List<String> _languageOptions = ['ไทย', 'English'];
 
 
-const List<Color> _menuTint = [
-  Color(0xFFDCEEF7), // ฟ้าอ่อน
-  Color(0xFFF6E1E7), // ชมพูอ่อน
-  Color(0xFFFFF3D2), // เหลืองอ่อน
-  Color(0xFFDCE4F2), // น้ำเงินอ่อน
-];
 const List<Color> _menuTintIcon = [
   Color(0xFF80A1D4),
   Color(0xFFC08B9D),
@@ -42,13 +36,14 @@ class AccountSettingScreen extends StatelessWidget {
         children: [
           _CuteMenuHeader(title: service.t('account_setting_title')),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+            padding: EdgeInsets.symmetric(horizontal: AppLayout.pageInset(context), vertical: 18),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _ProfileCard(service: service, user: user),
-                  const SizedBox(height: 26),
+                  const SizedBox(height: 18),
                   _sectionLabel(service.t('account_section'), Icons.favorite_rounded, AppColors.accentPink),
+                  _settingsGroup([
                   _tile(context, service.t('manage_profile'),
                       icon: Icons.badge_outlined,
                       tintIndex: 0,
@@ -63,8 +58,10 @@ class AccountSettingScreen extends StatelessWidget {
                       tintIndex: 2,
                       trailing: user?.language ?? 'ไทย',
                       onTap: () => _languageDialog(context, service)),
-                  const SizedBox(height: 22),
+                  ]),
+                  const SizedBox(height: 20),
                   _sectionLabel(service.t('preferences_section'), Icons.auto_awesome_rounded, AppColors.accentDeep),
+                  _settingsGroup([
                   _tile(context, service.t('about_us'),
                       icon: Icons.info_outline_rounded,
                       tintIndex: 3,
@@ -85,10 +82,10 @@ class AccountSettingScreen extends StatelessWidget {
                     value: service.successNotesEnabled,
                     onChanged: (_) => service.toggleSuccessNotes(),
                   ),
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
+                  ]),
+                  const SizedBox(height: 22),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: double.infinity, minHeight: 48),
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.danger,
@@ -109,7 +106,7 @@ class AccountSettingScreen extends StatelessWidget {
                       label: Text(service.t('logout'), style: const TextStyle(fontWeight: FontWeight.w700)),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 28),
                 ],
               ),
             ),
@@ -125,82 +122,61 @@ class AccountSettingScreen extends StatelessWidget {
           children: [
             Icon(icon, size: 15, color: color),
             const SizedBox(width: 6),
-            Text(text, style: AppTextStyles.heading),
+            Expanded(child: Text(text, style: AppTextStyles.heading)),
           ],
         ),
       );
 
-  Widget _tile(BuildContext context, String title,
-      {IconData? icon, String? trailing, VoidCallback? onTap, int tintIndex = 0}) {
-    final bg = _menuTint[tintIndex % _menuTint.length];
-    final fg = _menuTintIcon[tintIndex % _menuTintIcon.length];
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        onTap: onTap,
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: icon != null
-              ? Container(
-                  padding: const EdgeInsets.all(9),
-                  decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-                  child: Icon(icon, color: fg, size: 19),
-                )
-              : null,
-          title: Text(title,
-              style: TextStyle(
-                  fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-          trailing: trailing != null
-              ? Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                  child: Text(trailing,
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5, fontWeight: FontWeight.w600)),
-                )
-              : Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
-        ),
-      ),
-    );
-  }
+  Widget _settingsGroup(List<Widget> children) => Material(
+    color: AppColors.card,
+    borderRadius: BorderRadius.circular(14),
+    clipBehavior: Clip.antiAlias,
+    child: Column(children: [
+      for (var i = 0; i < children.length; i++) ...[
+        if (i > 0) Divider(height: 1, indent: 44, color: AppColors.border),
+        children[i],
+      ],
+    ]),
+  );
 
-  Widget _switchTile({
-    required String title,
-    required IconData icon,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    int tintIndex = 0,
-  }) {
-    final bg = _menuTint[tintIndex % _menuTint.length];
-    final fg = _menuTintIcon[tintIndex % _menuTintIcon.length];
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        child: ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Container(
-            padding: const EdgeInsets.all(9),
-            decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-            child: Icon(icon, color: fg, size: 19),
-          ),
-          title: Text(title,
-              style: TextStyle(
-                  fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-          subtitle: Text(subtitle, style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
-          trailing: Switch(
-            value: value,
-            activeColor: AppColors.ink,
-            onChanged: onChanged,
-          ),
-        ),
-      ),
+  Widget _tile(BuildContext context, String title,
+      {IconData? icon, String? trailing, VoidCallback? onTap, int tintIndex = 0}) =>
+    ListTile(
+      onTap: onTap,
+      dense: false,
+      minTileHeight: 58,
+      minLeadingWidth: 26,
+      horizontalTitleGap: 12,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      leading: icon == null ? null : Icon(icon, size: 24,
+        color: _menuTintIcon[tintIndex % _menuTintIcon.length]),
+      title: Text(title, style: TextStyle(fontSize: 15,
+        fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+        if (trailing != null) Text(trailing,
+          style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+        Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+      ]),
     );
-  }
+
+  Widget _switchTile({required String title, required IconData icon,
+    required String subtitle, required bool value,
+    required ValueChanged<bool> onChanged, int tintIndex = 0}) =>
+    ListTile(
+      dense: false,
+      minTileHeight: 58,
+      minLeadingWidth: 26,
+      horizontalTitleGap: 12,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      leading: Icon(icon, size: 24,
+        color: _menuTintIcon[tintIndex % _menuTintIcon.length]),
+      title: Text(title, style: TextStyle(fontSize: 15,
+        fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+      trailing: Semantics(label: subtitle, child: SizedBox(width: 48, height: 48,
+        child: FittedBox(child: Switch(
+          value: value, activeColor: AppColors.ink, onChanged: onChanged,
+        )))),
+    );
 
   void _editNameDialog(BuildContext context, DataService service) {
     final ctrl = TextEditingController(text: service.currentUser?.name);
@@ -235,10 +211,10 @@ class AccountSettingScreen extends StatelessWidget {
 
             return Dialog(
               backgroundColor: AppColors.bg,
-              insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +233,7 @@ class AccountSettingScreen extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(service.t('edit_username'),
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
                         ),
                         IconButton(
                           visualDensity: VisualDensity.compact,
@@ -267,7 +243,7 @@ class AccountSettingScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Text(service.t('display_name'),
                         style: AppTextStyles.label.copyWith(color: AppColors.textSecondary)),
                     const SizedBox(height: 8),
@@ -281,7 +257,7 @@ class AccountSettingScreen extends StatelessWidget {
                         if (errorText != null) setState(() => errorText = null);
                       },
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
@@ -330,10 +306,10 @@ class AccountSettingScreen extends StatelessWidget {
   }
 
   void _languageDialog(BuildContext context, DataService service) {
-    // ใช้ emoji ธงชาติจริง (🇹🇭/🇬🇧) แทนมาสคอตวงกลมที่มีแค่ตัวอักษร TH/EN
+    // แสดงธงไทยสำหรับภาษาไทย และธงสหรัฐฯ สำหรับ English
     Widget flagFor(String lang) => Text(
-        lang == 'ไทย' ? '🇹🇭' : '🇬🇧',
-        style: const TextStyle(fontSize: 26));
+        lang == 'ไทย' ? '🇹🇭' : '🇺🇸',
+        style: const TextStyle(fontSize: 23));
 
     showDialog(
       context: context,
@@ -341,10 +317,10 @@ class AccountSettingScreen extends StatelessWidget {
       builder: (dialogContext) {
         return Dialog(
           backgroundColor: AppColors.bg,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,7 +339,7 @@ class AccountSettingScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(service.t('choose_language'),
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
                     ),
                     IconButton(
                       visualDensity: VisualDensity.compact,
@@ -373,7 +349,7 @@ class AccountSettingScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 ..._languageOptions.map((lang) {
                   final selected = (service.currentUser?.language ?? 'ไทย') == lang;
                   return Padding(
@@ -388,7 +364,7 @@ class AccountSettingScreen extends StatelessWidget {
                           if (dialogContext.mounted) Navigator.pop(dialogContext);
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 13),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(AppRadius.md),
                             border: Border.all(
@@ -464,7 +440,7 @@ class _CuteMenuHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20, topSafeArea + 18, 20, 30),
+      padding: EdgeInsets.fromLTRB(16, topSafeArea + 8, 16, 14),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -498,8 +474,8 @@ class _CuteMenuHeader extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 40,
+                height: 40,
                 decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                 child: Icon(Icons.settings_suggest_rounded, color: AppColors.accentDeep, size: 21),
               ),
@@ -508,7 +484,7 @@ class _CuteMenuHeader extends StatelessWidget {
                 child: Text(
                   title,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 19, color: Color(0xFF3D568F)),
+                      fontWeight: FontWeight.w700, fontSize: 18, color: Color(0xFF3D568F)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -563,7 +539,7 @@ class _ProfileCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   _AvatarPicker(service: service),
@@ -574,23 +550,11 @@ class _ProfileCard extends StatelessWidget {
                       children: [
                         Text(user?.name ?? '-',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                                fontWeight: FontWeight.bold, fontSize: 17, color: AppColors.textPrimary)),
                         const SizedBox(height: 2),
                         Text(user?.email ?? '-',
                             style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.emoji_emotions_rounded, size: 13, color: AppColors.accentPink),
-                            const SizedBox(width: 4),
-                            Text(service.t('greeting'),
-                                style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: AppColors.textSecondary,
-                                    fontWeight: FontWeight.w600)),
-                          ],
-                        ),
+
                       ],
                     ),
                   ),
@@ -648,14 +612,14 @@ class _AvatarPicker extends StatelessWidget {
               ),
             ),
             child: CircleAvatar(
-              radius: 28,
+              radius: 25,
               backgroundColor: AppColors.bg,
               child: CircleAvatar(
-                radius: 26,
+                radius: 23,
                 backgroundColor: AppColors.accentBg,
                 backgroundImage: avatarImage,
                 child: avatarImage == null
-                    ? Icon(Icons.person, size: 26, color: AppColors.ink)
+                    ? Icon(Icons.person, size: 30, color: AppColors.ink)
                     : null,
               ),
             ),
@@ -696,7 +660,7 @@ class _AvatarPicker extends StatelessWidget {
                 Container(
                   width: 40,
                   height: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: 10),
                   decoration: BoxDecoration(
                     color: AppColors.border,
                     borderRadius: BorderRadius.circular(4),

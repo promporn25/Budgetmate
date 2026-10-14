@@ -1,5 +1,7 @@
+import 'home_screen.dart';
 import '../models/goal_model.dart';
 import '../widgets/data_action.dart';
+import '../widgets/pastel_artwork.dart';
 import 'package:budgetmate/screens/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +15,7 @@ import 'goal_saving_screen.dart';
 ///
 /// ดีไซน์ "Pastel Piggy" — ยังคุมโทนสีพาสเทลเดิมของแอปทั้งหมด (AppColors)
 /// แต่เพิ่มความน่ารักผ่าน:
-/// - การ์ดยอดคงเหลือไล่เฉดสี + ฟองสบู่ตกแต่ง + มาสคอตกระปุกออมสินยิ้ม
+/// - การ์ดยอดคงเหลือไล่เฉดสี + ฟองสบู่ตกแต่ง + การ์ตูนกระเป๋าเงินและเหรียญยิ้ม
 /// - หัวข้อมีไอคอน/อิโมจิเล็กๆ ประกอบ ให้ดูอบอุ่นเป็นกันเอง
 /// - การ์ดเป้าหมายออมเงินพาสเทล พร้อมป้าย "จำนวนเป้าหมาย" ทรงเม็ดยา
 class WalletScreen extends StatelessWidget {
@@ -23,12 +25,23 @@ class WalletScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final service = context.watch<DataService>();
 
-    return Scaffold(
+    void backToHome() => Navigator.of(context).pushAndRemoveUntil(
+      noAnimationRoute(const HomeScreen()), (route) => false);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) backToHome();
+      },
+      child: Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: AppColors.bg,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
+        leading: IconButton(
+          key: const Key('wallet-back'),
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          icon: const Icon(Icons.arrow_back_rounded), onPressed: backToHome),
         title: Text(service.t('wallet_title'),
             style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
       ),
@@ -41,18 +54,18 @@ class WalletScreen extends StatelessWidget {
         },
         child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.symmetric(horizontal: AppLayout.pageInset(context), vertical: 16),
         children: [
           _BalanceCard(service: service),
           const SizedBox(height: 22),
           Row(
             children: [
-              CuteMascot(kind: CuteMascotKind.coin, size: 16),
+              const PastelArtwork(categoryNumber: 32, size: 22),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(service.t('income_expense'),
                     style: TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
+                        fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
               ),
               GestureDetector(
                 onTap: () => Navigator.push(
@@ -68,7 +81,7 @@ class WalletScreen extends StatelessWidget {
                     children: [
                       Text(service.t('history'),
                           style: TextStyle(
-                              fontSize: 11.5,
+                              fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: AppColors.ink)),
                       Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.accentDeep),
@@ -78,7 +91,7 @@ class WalletScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -106,16 +119,16 @@ class WalletScreen extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           _GoalPreviewCard(service: service),
-          const SizedBox(height: 80),
+          const SizedBox(height: 16),
         ],
         ),
       ),
       bottomNavigationBar: const BottomNav(currentIndex: 1),
-    );
+    ));
   }
 
   /// กล่องสีรายรับ/รายจ่าย แตะเพื่อไปหน้าประวัติ (IncomeExpenseScreen)
-  /// ดีไซน์น่ารัก: พื้นพาสเทลนวล + ฟองสบู่ตกแต่งมุม + มาสคอตตัวโตในวงกลมยิ้ม
+  /// ดีไซน์น่ารัก: พื้นพาสเทลนวล + ฟองสบู่ตกแต่งมุม + การ์ตูนเหรียญและถุงช้อปปิ้ง
   /// + ชิปตัวเลขปุ่มมนแยกชั้นจากพื้นหลัง ให้ความรู้สึกนุ่มนวลเหมือนขนม
   Widget _statBox({
     required BuildContext context,
@@ -133,14 +146,15 @@ class WalletScreen extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         onTap: () => Navigator.push(context,
             noAnimationRoute(IncomeExpenseScreen(initialFilter: filter))),
         child: Container(
           width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 126),
           decoration: BoxDecoration(
             color: soft,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(color: mid.withOpacity(0.45), width: 1.4),
             boxShadow: [
               BoxShadow(
@@ -151,7 +165,7 @@ class WalletScreen extends StatelessWidget {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             child: Stack(
               children: [
                 // ฟองสบู่ตกแต่งมุมขวาบน-ล่าง ให้ความรู้สึกน่ารักฟรุ้งฟริ้ง
@@ -182,48 +196,31 @@ class WalletScreen extends StatelessWidget {
                       size: 11, color: mid.withOpacity(0.55)),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                  padding: const EdgeInsets.all(14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: mid.withOpacity(0.5), width: 1.2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: mid.withOpacity(0.3),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: CuteMascot(
-                                kind: isIncome
-                                    ? CuteMascotKind.income
-                                    : CuteMascotKind.expense,
-                                color: mid,
-                                size: 22),
+                          PastelArtwork(
+                            categoryNumber: isIncome ? 21 : 6,
+                            size: 30,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: Text(label,
                                 style: TextStyle(
                                     color: dark,
                                     fontWeight: FontWeight.w700,
-                                    fontSize: 12.5),
+                                    fontSize: 14),
                                 overflow: TextOverflow.ellipsis),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 18),
                       // ชิปตัวเลขพื้นขาวมนๆ แยกชั้นจากพื้นหลัง ดูเหมือนป้ายราคาขนม
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.75),
                           borderRadius: BorderRadius.circular(999),
@@ -244,9 +241,8 @@ class WalletScreen extends StatelessWidget {
                                   style: TextStyle(
                                       color: dark,
                                       fontWeight: FontWeight.w800,
-                                      fontSize: 16,
-                                      letterSpacing: -0.2),
-                                  overflow: TextOverflow.ellipsis),
+                                      fontSize: 15,
+                                      letterSpacing: -0.2)),
                             ),
                           ],
                         ),
@@ -271,106 +267,35 @@ class _BalanceCard extends StatelessWidget {
   const _BalanceCard({required this.service});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.accentDeep, AppColors.accentDeep.withOpacity(0.86), AppColors.accent],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accentDeep.withOpacity(0.28),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // ฟองสบู่ตกแต่งพาสเทลจางๆ
-            Positioned(
-              right: -26,
-              top: -30,
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.10), shape: BoxShape.circle),
-              ),
-            ),
-            Positioned(
-              right: 46,
-              top: -6,
-              child: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.14), shape: BoxShape.circle),
-              ),
-            ),
-            Positioned(
-              right: 96,
-              bottom: -18,
-              child: Icon(Icons.auto_awesome_rounded,
-                  size: 14, color: Colors.white.withOpacity(0.55)),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.16),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.account_balance_wallet_rounded,
-                          color: Colors.white, size: 18),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(service.t('wallet_header'),
-                          style: const TextStyle(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              letterSpacing: 1)),
-                    ),
-                    // มาสคอตกระปุกออมสินยิ้ม ในวงกลมขาวมุมขวาบน
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                      child: CuteMascot(
-                          kind: CuteMascotKind.coin, color: AppColors.accentDeep, size: 20),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                Text(service.t('total_balance'), style: const TextStyle(color: Colors.white70)),
-                const SizedBox(height: 6),
-                Text(service.formatMoney(service.balance),
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+    constraints: const BoxConstraints(minHeight: 132),
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      gradient: LinearGradient(colors: [AppColors.accentDeep,
+        Color.lerp(AppColors.accentDeep, AppColors.accent, 0.55)!]),
+    ),
+    child: Row(children: [
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(service.t('total_balance'),
+            style: const TextStyle(color: Colors.white70, fontSize: 14)),
+          const SizedBox(height: 10),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(service.formatMoney(service.balance),
+              style: const TextStyle(color: Colors.white,
+                fontSize: 28, fontWeight: FontWeight.w700))),
+        ])),
+      const SizedBox(width: 12),
+      const PastelArtwork(categoryNumber: 14, size: 48),
+    ]),
+  );
 }
 
 /// การ์ดพรีวิวเป้าหมายการออม — พาสเทลอ่อนกว่าเดิม พร้อมป้ายทรงเม็ดยาบอกจำนวน
-/// เป้าหมายที่กำลังดำเนินอยู่ และไอคอนกระปุกในวงกลมพื้นขาว ให้เข้าชุดกับ
+/// เป้าหมายที่กำลังดำเนินอยู่ และการ์ตูนกระปุกออมสิน ให้เข้าชุดกับ
 /// การ์ดยอดคงเหลือ/สถิติรายรับ-รายจ่ายด้านบน
 class _GoalPreviewCard extends StatelessWidget {
   final DataService service;
@@ -379,6 +304,7 @@ class _GoalPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       color: AppColors.accentAltBg,
       onTap: () => Navigator.push(
           context, noAnimationRoute(const GoalSavingScreen())),
@@ -392,32 +318,18 @@ class _GoalPreviewCard extends StatelessWidget {
           ),
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.accentDeep.withOpacity(0.12),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Icon(Icons.savings_rounded, color: AppColors.ink),
-              ),
-              const SizedBox(width: 14),
+              const PastelArtwork(categoryNumber: 17, size: 44),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(service.t('goal_saving'),
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimary)),
-                    const SizedBox(height: 6),
+                            fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                    const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppColors.brightness == Brightness.dark
                             ? AppColors.surface : Colors.white.withOpacity(0.7),
@@ -427,7 +339,7 @@ class _GoalPreviewCard extends StatelessWidget {
                           style: TextStyle(
                               color: AppColors.textSecondary,
                               fontWeight: FontWeight.w600,
-                              fontSize: 12)),
+                              fontSize: 13)),
                     ),
                   ],
                 ),

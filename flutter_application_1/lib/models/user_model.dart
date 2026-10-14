@@ -11,8 +11,6 @@ class UserModel {
   String currency;
   // Stored financial amounts keep this unit; display currency can change safely.
   final String ledgerCurrency;
-  double exchangeRate;
-  String? exchangeRateDate;
 
   /// รูปโปรไฟล์ เก็บเป็น Base64 string ลง Firestore โดยตรง (ไม่ใช้ Firebase Storage)
   ///
@@ -33,8 +31,6 @@ class UserModel {
     this.currency = 'THB',
     this.avatarBase64,
     String? ledgerCurrency,
-    this.exchangeRate = 1,
-    this.exchangeRateDate,
   }) : ledgerCurrency = ledgerCurrency ?? currency;
 
   Map<String, dynamic> toMap() {
@@ -46,8 +42,6 @@ class UserModel {
       'language': language,
       'currency': currency,
       'ledger_currency': ledgerCurrency,
-      'exchange_rate': exchangeRate,
-      'exchange_rate_date': exchangeRateDate,
       'avatar_base64': avatarBase64,
     };
   }
@@ -61,8 +55,6 @@ class UserModel {
       language: map['language'] as String? ?? 'ไทย',
       currency: map['currency'] as String? ?? 'THB',
       ledgerCurrency: map['ledger_currency'] as String? ?? map['currency'] as String? ?? 'THB',
-      exchangeRate: (map['exchange_rate'] as num?)?.toDouble() ?? 1,
-      exchangeRateDate: map['exchange_rate_date'] as String?,
       avatarBase64: map['avatar_base64'] as String?,
     );
   }

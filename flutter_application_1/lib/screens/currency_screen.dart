@@ -17,18 +17,18 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
     final english = service.currentLanguage == 'English';
     return Scaffold(
       appBar: AppBar(title: Text(service.t('currency_label'))),
-      body: ListView(padding: const EdgeInsets.all(24), children: [
+      body: ListView(padding: const EdgeInsets.all(16), children: [
         DropdownButtonFormField<String>(
           initialValue: selected ?? service.currentCurrency,
           decoration: InputDecoration(labelText: service.t('currency_label')),
           items: DataService.supportedCurrencies.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
           onChanged: saving ? null : (value) => setState(() => selected = value),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         Text(english ? 'New entries use the selected currency. Existing entries keep their original currency. Wallet, history and goals show the selected currency only; switch back to view earlier entries.'
           : 'รายการใหม่บันทึกตามสกุลเงินที่เลือก รายการเดิมคงสกุลเงินเดิม กระเป๋า ประวัติ และเป้าหมายแสดงเฉพาะสกุลเงินที่เลือก เปลี่ยนกลับเพื่อดูรายการเดิมได้'),
         if (error != null) Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         FilledButton(onPressed: saving ? null : () async {
           setState(() { saving = true; error = null; });
           try {

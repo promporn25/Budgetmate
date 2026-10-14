@@ -1,3 +1,4 @@
+import 'password_policy.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -56,11 +57,8 @@ class DataService extends ChangeNotifier {
     } else {
       await _db.update('users', {
         'currency': currency, 'ledger_currency': user.ledgerCurrency,
-        'exchange_rate': 1, 'exchange_rate_date': null,
       }, 'id = ?', [user.id]);
       user.currency = currency;
-      user.exchangeRate = 1;
-      user.exchangeRateDate = null;
     }
     notifyListeners();
   }
@@ -72,6 +70,8 @@ class DataService extends ChangeNotifier {
   // ---------------- User session ----------------
   UserModel? currentUser;
   bool isReady = false;
+  bool _googleLoginCreatedAccount = false;
+  bool get googleLoginCreatedAccount => _googleLoginCreatedAccount;
 
   // ---------------- Profile picture (แคชไฟล์ในเครื่องไว้แสดงผลเร็วในเซสชันนี้) ----------------
   // แหล่งข้อมูลจริงคือ currentUser.avatarBase64 (มาจาก Firestore) ซึ่งตามบัญชีไป
@@ -185,7 +185,7 @@ class DataService extends ChangeNotifier {
     categories
       ..clear()
       ..addAll(defaultCategories)
-      ..addAll(rows.map(CategoryModel.fromMap));
+      ..addAll(rows.map(CategoryModel.fromMap).expand((c) => [c, ...c.childCategories]));
   }
 
   CategoryModel _categoryById(String id) {
@@ -262,6 +262,8 @@ class DataService extends ChangeNotifier {
   /// (Firebase เป็นผู้ตรวจสอบอีเมลซ้ำ/ความยาวรหัสผ่านให้ ไม่ต้องเช็คเองในแอปอีก)
   /// จากนั้นจึงบันทึกข้อมูลโปรไฟล์ (ชื่อ/ภาษา/สกุลเงิน) ลง Firestore โดยใช้ uid เป็น id
   Future<String?> register(String name, String email, String password) async {
+    final invalid = passwordValidationKey(password);
+    if (invalid != null) return t(invalid);
     try {
       final cred = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password)
@@ -358,6 +360,7 @@ class DataService extends ChangeNotifier {
   /// เข้าสู่ระบบ/สมัครสมาชิกอัตโนมัติด้วยบัญชี Google
   /// คืนค่า null หากสำเร็จ หรือข้อความ error หากไม่สำเร็จ/ผู้ใช้ยกเลิก
   Future<String?> loginWithGoogle() async {
+    _googleLoginCreatedAccount = false;
     try {
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return t('login_error'); // ผู้ใช้กดยกเลิก
@@ -399,6 +402,7 @@ class DataService extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       avatarPath = prefs.getString('avatar_path_${user.id}');
 
+      _googleLoginCreatedAccount = rows.isEmpty;
       notifyListeners();
       return null;
     } catch (e) {
@@ -546,6 +550,8 @@ class DataService extends ChangeNotifier {
   /// ยืนยันตัวตนซ้ำ (reauthenticate) กับ Firebase Authentication ด้วยรหัสผ่านเดิม
   /// ก่อนอัปเดตเป็นรหัสผ่านใหม่ (ผู้ใช้ที่ล็อกอินด้วย Google เท่านั้นที่จะไม่มีรหัสผ่านให้เปลี่ยน)
   Future<String?> changePassword(String currentPassword, String newPassword) async {
+    final invalid = passwordValidationKey(newPassword);
+    if (invalid != null) return t(invalid);
     if (currentUser == null) return t('please_login_first');
     final fbUser = FirebaseAuth.instance.currentUser;
     if (fbUser == null || fbUser.email == null) return t('please_login_first');
@@ -627,13 +633,17 @@ class DataService extends ChangeNotifier {
     String? note,
     String? description,
   }) async {
-    if (currentUser == null) return;
+    if (currentUser == null) throw StateError(t('please_login_first'));
     final index = _transactions.indexWhere((t) => t.id == id);
-    if (index == -1) return;
+    if (index == -1) throw StateError('Transaction not found');
     if (amount != null && (!amount.isFinite || amount <= 0)) {
       throw ArgumentError(t('enter_valid_amount'));
     }
-    final updated = _transactions[index].copyWith(
+    final original = _transactions[index];
+    if ((category ?? original.category).type != (type ?? original.type)) {
+      throw ArgumentError(t('select_category'));
+    }
+    final updated = original.copyWith(
       type: type,
       amount: amount,
       category: category,
@@ -641,21 +651,48 @@ class DataService extends ChangeNotifier {
       note: note,
       description: description,
     );
-    await _db.update('transactions', _toStored(updated.toMap(currentUser!.id)), 'id = ?', [id]);
+    if (_transactions[index].description?.startsWith('goal_transfer:') == true) {
+      _applyUpdatedGoal(await _db.changeGoalTransfer(id, _toStored(updated.toMap(currentUser!.id))));
+    } else {
+      await _db.update('transactions', _toStored(updated.toMap(currentUser!.id)), 'id = ?', [id]);
+    }
     _transactions[index] = updated;
     notifyListeners();
   }
 
+  void _applyUpdatedGoal(Map<String, dynamic>? data) {
+    if (data == null) return;
+    final index = _goals.indexWhere((g) => g.id == data['id']);
+    if (index != -1) _goals[index] = GoalModel.fromMap(_toDisplay(data));
+  }
+
   Future<void> deleteTransaction(String id) async {
-    await _db.delete('transactions', 'id = ?', [id]);
+    if (currentUser == null) throw StateError(t('please_login_first'));
+    final index = _transactions.indexWhere((entry) => entry.id == id);
+    if (index == -1) return;
+    if (_transactions[index].description?.startsWith('goal_transfer:') == true) {
+      _applyUpdatedGoal(await _db.changeGoalTransfer(id, null));
+    } else {
+      await _db.delete('transactions', 'id = ?', [id]);
+    }
     _transactions.removeWhere((t) => t.id == id);
     notifyListeners();
   }
 
-  Future<CategoryModel> addCategory(String name, CategoryType type, IconData icon) async {
-    final category = CategoryModel(id: _uuid.v4(), name: name, type: type, icon: icon);
+  Future<CategoryModel> addCategory(String name, CategoryType type, IconData icon, {
+    int? colorValue, int? artworkNumber, List<String> subcategories = const [],
+  }) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) throw ArgumentError('Category name is required');
+    final children = subcategories.map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    if (children.map((s) => s.toLowerCase()).toSet().length != children.length) {
+      throw ArgumentError('Duplicate subcategory names');
+    }
+    final category = CategoryModel(id: _uuid.v4(), name: trimmed, type: type, icon: icon,
+      colorValue: colorValue, artworkNumber: artworkNumber,
+      subcategories: List.unmodifiable(children));
     await _db.insert('categories', category.toMap());
-    categories.add(category);
+    categories.addAll([category, ...category.childCategories]);
     notifyListeners();
     return category;
   }
@@ -676,6 +713,7 @@ class DataService extends ChangeNotifier {
     required IconData icon,
     double savedAmount = 0,
     String? note,
+    int? artworkNumber,
   }) async {
     if (currentUser == null) return t('please_login_first');
     if (!targetAmount.isFinite || targetAmount <= 0 ||
@@ -691,6 +729,7 @@ class DataService extends ChangeNotifier {
       startDate: DateTime.now(),
       targetDate: targetDate,
       icon: icon,
+      artworkNumber: artworkNumber,
       note: note,
       status: savedAmount >= targetAmount ? GoalStatus.completed : GoalStatus.inProgress,
     );
@@ -791,6 +830,37 @@ class DataService extends ChangeNotifier {
 
     notifyListeners();
     return null;
+  }
+
+  List<GoalModel> get pinnedGoals => goals.where((g) => g.isPinned).toList();
+
+  Future<String?> editGoal(String id, {required String name, required double targetAmount,
+      required DateTime targetDate, required IconData icon, String? note, int? artworkNumber}) async {
+    if (currentUser == null) return t('please_login_first');
+    final index = _goals.indexWhere((g) => g.id == id);
+    if (index == -1) return t('goal_not_found');
+    final goal = _goals[index];
+    if (name.trim().isEmpty || !targetAmount.isFinite || targetAmount <= 0) return t('fill_name_and_amount');
+    if (targetAmount < goal.savedAmount) return t('target_below_saved');
+    final updated = goal.copyWith(name: name.trim(), targetAmount: targetAmount,
+      targetDate: targetDate, icon: icon, note: note, artworkNumber: artworkNumber,
+      status: goal.savedAmount >= targetAmount ? GoalStatus.completed : GoalStatus.inProgress);
+    try {
+      await _db.update('goals', _toStored(updated.toMap(currentUser!.id)), 'id = ?', [id]);
+    } catch (_) { return t('save_failed'); }
+    _goals[index] = updated;
+    notifyListeners();
+    return null;
+  }
+
+  Future<void> setGoalPinned(String id, bool pinned) async {
+    if (currentUser == null) throw StateError(t('please_login_first'));
+    final index = _goals.indexWhere((g) => g.id == id);
+    if (index == -1) throw StateError(t('goal_not_found'));
+    final updated = _goals[index].copyWith(isPinned: pinned);
+    await _db.update('goals', {'is_pinned': pinned}, 'id = ?', [id]);
+    _goals[index] = updated;
+    notifyListeners();
   }
 
   Future<void> deleteGoal(String id) async {
@@ -897,9 +967,12 @@ class DataService extends ChangeNotifier {
   }
 
   /// สัดส่วนค่าใช้จ่ายแยกตามหมวดหมู่ สำหรับ Pie Chart หน้า Income/Expense
-  Map<CategoryModel, double> expenseByCategory({DateTime? month}) {
+  Map<CategoryModel, double> expenseByCategory({DateTime? month}) =>
+      totalsByCategory(type: CategoryType.expense, month: month);
+
+  Map<CategoryModel, double> totalsByCategory({required CategoryType type, DateTime? month}) {
     final Map<CategoryModel, double> map = {};
-    for (final t in _activeTransactions.where((t) => t.type == CategoryType.expense)) {
+    for (final t in _activeTransactions.where((t) => t.type == type)) {
       if (month != null &&
           !(t.date.year == month.year && t.date.month == month.month)) {
         continue;

@@ -3,6 +3,15 @@
   const mode = params.get('mode');
   const oobCode = params.get('oobCode');
   const apiKey = params.get('apiKey');
+  // Firebase shares this URL across email templates. Preserve its standard
+  // handler for verification, recovery and other non-password-reset actions.
+  if (mode && mode !== 'resetPassword') {
+    const fallback = new URL('https://budgetmate-app-a94da.firebaseapp.com/__/auth/action');
+    fallback.search = params.toString();
+    window.location.replace(fallback.href);
+    return;
+  }
+
   let continueLang;
   try { continueLang = new URL(params.get('continueUrl')).searchParams.get('lang'); } catch (_) {}
   const lang = (continueLang || params.get('lang') || 'th').toLowerCase();
@@ -26,6 +35,10 @@
       footerNote: 'หากคุณไม่ได้เป็นผู้ขอรีเซ็ตรหัสผ่านนี้ สามารถปิดหน้านี้ได้เลย บัญชีของคุณยังปลอดภัย',
       errTooShort: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
       errMismatch: 'รหัสผ่านไม่ตรงกัน',
+      errTooLong: 'รหัสผ่านยาวเกิน 128 ตัวอักษร',
+      errCommon: 'รหัสผ่านนี้เดาง่าย กรุณาเลือกวลีอื่น',
+      errConfirm: 'กรุณากรอกยืนยันรหัสผ่าน',
+      policyValid: 'รหัสผ่านผ่านเงื่อนไขแล้ว',
       errGeneric: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
       errBadLink: 'ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว',
     },
@@ -46,23 +59,27 @@
       footerNote: "If you didn't request this, you can safely close this page. Your account is still secure.",
       errTooShort: 'Password must be at least 6 characters',
       errMismatch: 'Passwords do not match',
+      errTooLong: 'Password exceeds the 128-character limit',
+      errCommon: 'This password is too common. Choose another passphrase.',
+      errConfirm: 'Please confirm your password',
+      policyValid: 'Password meets the requirements',
       errGeneric: 'Something went wrong. Please try again.',
       errBadLink: 'This link is invalid or has expired.',
     },
   };
   Object.assign(dict.th, {
-    passwordHint: 'อย่างน้อย 6 ตัวอักษร และควรใช้รหัสที่ไม่ซ้ำกับบัญชีอื่น',
+    passwordHint: 'ใช้ 6 ตัวอักษรขึ้นไป มี a–z, A–Z, ตัวเลข และสัญลักษณ์ อย่างน้อยประเภทละ 1 ตัว',
     networkTitle: 'ยังเชื่อมต่อไม่ได้', securityLabel: 'พื้นที่ส่วนตัวของคุณ', retry: 'ลองอีกครั้ง',
     errNetwork: 'ยังเชื่อมต่อไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง',
-    errPolicy: 'รหัสผ่านยังไม่ตรงตามเงื่อนไขของบัญชี ลองใช้รหัสที่ยาวขึ้นและผสมตัวอักษร ตัวเลข และสัญลักษณ์',
+    errPolicy: 'รหัสผ่านยังไม่ตรงตามเงื่อนไขของบัญชี กรุณาเลือกวลีอื่นที่ยาวอย่างน้อย 6 ตัวอักษร',
     showPassword: 'แสดงรหัสผ่าน', hidePassword: 'ซ่อนรหัสผ่าน',
     passwordMatch: 'รหัสผ่านตรงกันแล้ว',
   });
   Object.assign(dict.en, {
-    passwordHint: 'At least 6 characters. Use a password you do not use elsewhere.',
+    passwordHint: 'Use at least 6 characters with at least 1 lowercase letter, uppercase letter, number and symbol.',
     networkTitle: 'Unable to connect', securityLabel: 'Your personal space', retry: 'Try again',
     errNetwork: 'Unable to connect. Check your internet connection and try again.',
-    errPolicy: 'This password does not meet your account policy. Try a longer password with letters, numbers and symbols.',
+    errPolicy: 'This password does not meet your account policy. Choose a different passphrase of at least 6 characters.',
     showPassword: 'Show password', hidePassword: 'Hide password',
     passwordMatch: 'Passwords match',
   });
@@ -165,8 +182,19 @@
     errorBanner.classList.remove('hidden');
   }
 
+  const policyMessages = {
+    password_lowercase: isEN ? 'At least 1 lowercase letter (a–z)' : 'ตัวพิมพ์เล็ก a–z อย่างน้อย 1 ตัว',
+    password_uppercase: isEN ? 'At least 1 uppercase letter (A–Z)' : 'ตัวพิมพ์ใหญ่ A–Z อย่างน้อย 1 ตัว',
+    password_digit: isEN ? 'At least 1 number (0–9)' : 'ตัวเลข 0–9 อย่างน้อย 1 ตัว',
+    password_symbol: isEN ? 'At least 1 symbol, such as ! @ #' : 'สัญลักษณ์ เช่น ! @ # อย่างน้อย 1 ตัว',
+ password_min_length: T.errTooShort, password_max_length: T.errTooLong, password_common: T.errCommon };
+  function passwordError(value) {
+    const key = window.BudgetmatePasswordPolicy.validate(value);
+    return key ? policyMessages[key] : null;
+  }
   [newPw, confirmPw].forEach(input => input.addEventListener('input', () => {
     clearError();
+    document.getElementById('policy-status').textContent = newPw.value ? (passwordError(newPw.value) || T.policyValid) : '';
     if (confirmPw.value && newPw.value === confirmPw.value) matchHint.textContent = T.passwordMatch;
   }));
   let saving = false;
@@ -178,10 +206,17 @@
     const pw1 = newPw.value;
     const pw2 = confirmPw.value;
 
-    if (pw1.length < 6) {
+    const invalid = passwordError(pw1);
+    if (invalid) {
       wrapNew.classList.add('has-error');
-      showError(T.errTooShort);
+      showError(invalid);
       newPw.focus();
+      return;
+    }
+    if (!pw2) {
+      wrapConfirm.classList.add('has-error');
+      showError(T.errConfirm);
+      confirmPw.focus();
       return;
     }
     if (pw1 !== pw2) {
